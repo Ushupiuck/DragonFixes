@@ -7,8 +7,9 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraft.launchwrapper.Launch;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,12 +40,52 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
         if (DragonFixesConfig.disableTickInterceptASM && loadedCoreMods.contains(DRAGON_REALM_ASM)) {
             disableTickIntercept();
         }
+        List<String> mixins = new ArrayList<>();
         if (Launch.classLoader.getResource("com/colen/tempora/mixins/MixinWorldServer.class") != null
                 && Launch.classLoader.getResource(
                         "Reika/DragonAPI/Instantiable/Event/BlockTickEvent.class") != null) {
-            return Collections.singletonList("world.MixinWorldServerTemporaCompat");
+            mixins.add("world.MixinWorldServerTemporaCompat");
         }
-        return Collections.emptyList();
+
+        // ChromatiCraft assumes that merely having PlayerAPI installed means it
+        // renamed EntityPlayerSP's push-out method. Modern combinations do not.
+        if (Launch.classLoader.getResource(
+                "Reika/ChromatiCraft/Auxiliary/ChromaASMHandler.class") != null
+                && Launch.classLoader.getResource("api/player/forge/PlayerAPITransformer.class") != null
+                && replaceBrokenChromaPushoutPatch()) {
+            mixins.add("chromaticraft.MixinEntityPlayerSPOreClip");
+        }
+        return mixins;
+    }
+
+    private static boolean replaceBrokenChromaPushoutPatch() {
+        try {
+            Class<?> transformer = Class.forName(
+                    "Reika.ChromatiCraft.Auxiliary.ChromaASMHandler$ASMExecutor", true, Launch.classLoader);
+            Field classesField = transformer.getDeclaredField("classes");
+            classesField.setAccessible(true);
+            Object value = classesField.get(null);
+            if (!(value instanceof Map)) {
+                DragonFixes.LOGGER.warn("ChromatiCraft patcher table is not a Map; leaving it alone");
+                return false;
+            }
+
+            Map<?, ?> patches = (Map<?, ?>) value;
+            Iterator<? extends Map.Entry<?, ?>> iterator = patches.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Object patch = iterator.next().getValue();
+                if (patch instanceof Enum && "ENTITYPUSHOUT".equals(((Enum<?>) patch).name())) {
+                    iterator.remove();
+                    DragonFixes.LOGGER.info("Replacing ChromatiCraft ENTITYPUSHOUT ASM "
+                            + "with a targeted OreClip Mixin");
+                    return true;
+                }
+            }
+            DragonFixes.LOGGER.warn("ChromatiCraft ENTITYPUSHOUT patch was not present in the table");
+        } catch (ReflectiveOperationException | SecurityException e) {
+            DragonFixes.LOGGER.warn("Unable to replace ChromatiCraft's PlayerAPI-sensitive patch", e);
+        }
+        return false;
     }
 
     /**
