@@ -55,6 +55,14 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
                 && replaceBrokenChromaPushoutPatch()) {
             mixins.add("chromaticraft.MixinEntityPlayerSPOreClip");
         }
+        // If LiquidLogged actually stores the fluid, don't let Reika paint a
+        // second, visual-only water surface over the same block.
+        if (Launch.classLoader.getResource(
+                "com/gtnewhorizons/liquidlogged/api/LiquidLoggedAPI.class") != null
+                && Launch.classLoader.getResource(
+                        "Reika/DragonAPI/Auxiliary/DragonAPIEventWatcher.class") != null) {
+            mixins.add("dragonapi.MixinDragonAPIEventWatcherLiquidLogged");
+        }
         return mixins;
     }
 

@@ -152,7 +152,7 @@ public class WorldRendererLiquidLoggedCompatASM implements IClassTransformer {
                     InsnList after = new InsnList();
                     after.add(new VarInsnNode(Opcodes.ISTORE, result));
                     after.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                    after.add(new FieldInsnNode(Opcodes.GETFIELD, WORLD_RENDERER,
+                    after.add(new FieldInsnNode(Opcodes.GETFIELD, WORLD_RENDERER.replace('.', '/'),
                             "liquidlogged$fluidBlock", BLOCK_DESC));
                     after.add(new JumpInsnNode(Opcodes.IFNULL, noFluid));
                     after.add(new VarInsnNode(Opcodes.ALOAD, rb));
