@@ -12,7 +12,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 import Reika.DragonAPI.Interfaces.Block.Submergeable;
 
@@ -54,9 +53,8 @@ public final class SubmergeableLiquidLoggedCompat {
                     continue;
                 }
                 Block block = (Block) candidate;
-                if (!(block instanceof Submergeable) || holderType.isInstance(block)
-                        || isChromatiCraftBlock(block)) {
-                    continue; // Explicit LiquidLogged IFluidHolder contracts take priority.
+                if (!(block instanceof Submergeable) || holderType.isInstance(block)) {
+                    continue; // An explicit LiquidLogged contract takes priority.
                 }
                 Object predicate = Proxy.newProxyInstance(
                         predicateType.getClassLoader(), new Class<?>[] { predicateType },
@@ -92,19 +90,6 @@ public final class SubmergeableLiquidLoggedCompat {
                 | LinkageError | SecurityException e) {
             DragonFixes.LOGGER.warn("Unable to register optional LiquidLogged/Submergeable bridge", e);
         }
-    }
-
-    /**
-     * ChromatiCraft owns its special submerged-block visuals. Do not silently
-     * turn its crystals or structure shields into persistent fluid holders.
-     */
-    public static boolean isChromatiCraftBlock(Block block) {
-        if (block == null) {
-            return false;
-        }
-        GameRegistry.UniqueIdentifier id = GameRegistry.findUniqueIdentifierFor(block);
-        return (id != null && "ChromatiCraft".equals(id.modId))
-                || block.getClass().getName().startsWith("Reika.ChromatiCraft.");
     }
 
     /** Only consult the stored fluid for a Reika block that wants to draw water. */

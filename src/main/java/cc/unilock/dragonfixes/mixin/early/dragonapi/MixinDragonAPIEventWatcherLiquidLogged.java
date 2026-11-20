@@ -23,7 +23,6 @@ public abstract class MixinDragonAPIEventWatcherLiquidLogged {
             Block block, int x, int y, int z, WorldRenderer renderer, RenderBlocks render,
             int pass, CallbackInfoReturnable<Boolean> cir) {
         if (block instanceof Submergeable
-                && !SubmergeableLiquidLoggedCompat.isChromatiCraftBlock(block)
                 && SubmergeableLiquidLoggedCompat.hasStoredFluid(render.blockAccess, x, y, z)) {
             // Reika's event watcher only renders the optional visual water surface
             // here. It doesn't need to render it when the cell has real stored fluid.
