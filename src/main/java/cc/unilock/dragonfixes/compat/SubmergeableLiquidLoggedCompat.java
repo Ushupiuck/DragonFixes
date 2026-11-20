@@ -48,7 +48,11 @@ public final class SubmergeableLiquidLoggedCompat {
                     int.class, int.class, int.class);
 
             int count = 0;
-            for (Block block : GameData.getBlockRegistry()) {
+            for (Object candidate : GameData.getBlockRegistry()) {
+                if (!(candidate instanceof Block)) {
+                    continue;
+                }
+                Block block = (Block) candidate;
                 if (!(block instanceof Submergeable) || holderType.isInstance(block)) {
                     continue; // Explicit LiquidLogged IFluidHolder contracts take priority.
                 }
