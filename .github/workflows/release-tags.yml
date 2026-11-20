@@ -27,18 +27,23 @@ jobs:
       MAVEN_PUBLISHING_URL: ${{ vars.MAVEN_PUBLISHING_URL || 'https://nexus.gtnewhorizons.com/repository/releases/' }}
     steps:
       - name: Checkout mod repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 32
 
-      - name: Set up JDK version
-        uses: actions/setup-java@v4
+      - name: Set up JDK versions
+        uses: actions/setup-java@v6
         with:
-          java-version: 8
+          java-version: |
+            8
+            17
+            21
+            25
           distribution: 'zulu'
+          problem-matcher: true
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
