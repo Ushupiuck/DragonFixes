@@ -178,7 +178,8 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             "cc.unilock.dragonfixes.asm.dragonapi.AE2CSVExportCompatASM",
             "cc.unilock.dragonfixes.asm.dragonapi.AE2CSVItemNameCompatASM",
             "cc.unilock.dragonfixes.asm.dragonapi.ForestryReflectionCompatASM",
-            "cc.unilock.dragonfixes.asm.dragonapi.TwilightNagastoneCompatASM"
+            "cc.unilock.dragonfixes.asm.dragonapi.TwilightNagastoneCompatASM",
+            "cc.unilock.dragonfixes.asm.dragonapi.PlayerPlaceBlockSideCompatASM"
         };
     }
 
