@@ -166,7 +166,8 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             "cc.unilock.dragonfixes.asm.dragonapi.ReikaJavaLibraryASM",
             "cc.unilock.dragonfixes.asm.dragonapi.WorldServerTemporaCompatASM",
             "cc.unilock.dragonfixes.asm.dragonapi.BlockLiquidLiquidLoggedCompatASM",
-            "cc.unilock.dragonfixes.asm.dragonapi.WorldRendererLiquidLoggedCompatASM"
+            "cc.unilock.dragonfixes.asm.dragonapi.WorldRendererLiquidLoggedCompatASM",
+            "cc.unilock.dragonfixes.asm.dragonapi.ReikaOreDictionaryLogASM"
         };
     }
 
