@@ -50,12 +50,23 @@ jobs:
           build-scan-terms-of-use-agree: "yes"
           validate-wrappers: true
 
-      - name: Download DragonRealmCore
+      # The runner filesystem is disposable. Cache this *pinned* dependency
+      # across runs; editing our Java files must not re-download Reika's JAR.
+      # Changing the versioned URL manifest automatically invalidates this key.
+      - name: Restore DragonRealmCore cache
+        id: dragonrealmcore-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: libs/DragonRealmCore 1.7.10 V33a.jar
+          key: ${{ runner.os }}-dragonrealmcore-${{ hashFiles('.github/dependencies/dragonrealmcore.url') }}
+
+      - name: Download DragonRealmCore (cache miss only)
+        if: steps.dragonrealmcore-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
           destination='libs/DragonRealmCore 1.7.10 V33a.jar'
-          url='https://dragonrealm.overminddl1.com/downloads/ReikaMods/DragonRealmCore%201.7.10%20V33a.jar'
+          url=$(cat .github/dependencies/dragonrealmcore.url)
           temp_file=$(mktemp)
           trap 'rm -f "$temp_file"' EXIT
           curl --fail --location --show-error --silent \
@@ -64,6 +75,23 @@ jobs:
             --output "$temp_file" "$url"
           jar tf "$temp_file" > /dev/null
           mv "$temp_file" "$destination"
+
+      # Also validate restored caches before attempting to compile.
+      - name: Verify DragonRealmCore
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s 'libs/DragonRealmCore 1.7.10 V33a.jar'
+          jar tf 'libs/DragonRealmCore 1.7.10 V33a.jar' > /dev/null
+
+      # Save *before* Gradle: cache the dependency even if our code fails later.
+      # Fork PRs can restore the main-branch cache without saving a new copy.
+      - name: Save DragonRealmCore cache
+        if: steps.dragonrealmcore-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        uses: actions/cache/save@v6
+        with:
+          path: libs/DragonRealmCore 1.7.10 V33a.jar
+          key: ${{ steps.dragonrealmcore-cache.outputs.cache-primary-key }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
