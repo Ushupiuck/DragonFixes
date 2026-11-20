@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "America/Argentina/Buenos_Aires",
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "dependencyDashboard": true,
+  "prConcurrentLimit": 6,
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Track current GTNH Maven library artifacts while preserving pinned, reproducible builds.",
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchPackageNames": [
+        "com.github.GTNewHorizons:*"
+      ],
+      "registryUrls": [
+        "https://nexus.gtnewhorizons.com/repository/public/"
+      ]
+    },
+    {
+      "description": "Reika and other Curse Maven file IDs are deliberately pinned; updating them requires compatibility review.",
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchPackageNames": [
+        "curse.maven:*"
+      ],
+      "enabled": false
+    }
+  ]
+}
