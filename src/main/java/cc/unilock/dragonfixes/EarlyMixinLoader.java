@@ -55,6 +55,13 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
                 && replaceBrokenChromaPushoutPatch()) {
             mixins.add("chromaticraft.MixinEntityPlayerSPOreClip");
         }
+        // ChromatiCraft's Data Crystal assumes durability requests always have
+        // NBT. NEI legitimately probes a clean ItemStack without NBT.
+        if (Launch.classLoader.getResource(
+                "Reika/ChromatiCraft/Items/Tools/ItemDataCrystal.class") != null) {
+            mixins.add("chromaticraft.MixinItemDataCrystalGuard");
+        }
+
         // If LiquidLogged actually stores the fluid, don't let Reika paint a
         // second, visual-only water surface over the same block.
         if (Launch.classLoader.getResource(
@@ -168,7 +175,10 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             "cc.unilock.dragonfixes.asm.dragonapi.BlockLiquidLiquidLoggedCompatASM",
             "cc.unilock.dragonfixes.asm.dragonapi.WorldRendererLiquidLoggedCompatASM",
             "cc.unilock.dragonfixes.asm.dragonapi.ReikaOreDictionaryLogASM",
-            "cc.unilock.dragonfixes.asm.dragonapi.AE2CSVExportCompatASM"
+            "cc.unilock.dragonfixes.asm.dragonapi.AE2CSVExportCompatASM",
+            "cc.unilock.dragonfixes.asm.dragonapi.AE2CSVItemNameCompatASM",
+            "cc.unilock.dragonfixes.asm.dragonapi.ForestryReflectionCompatASM",
+            "cc.unilock.dragonfixes.asm.dragonapi.TwilightNagastoneCompatASM"
         };
     }
 
