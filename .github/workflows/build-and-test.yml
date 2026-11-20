@@ -18,10 +18,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup JDK version
+      - name: Setup JDK versions
         uses: actions/setup-java@v4
         with:
-          java-version: 8
+          java-version: |
+            8
+            17
+            21
+            25
           distribution: 'zulu'
 
       - name: Setup Gradle
