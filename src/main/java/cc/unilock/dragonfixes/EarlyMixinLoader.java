@@ -55,6 +55,14 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
                 && replaceBrokenChromaPushoutPatch()) {
             mixins.add("chromaticraft.MixinEntityPlayerSPOreClip");
         }
+        // A virtual StructureLib/GuideNH placement can have no actual player.
+        // Do not dispatch a PlayerPlaceBlockEvent to listeners which expect
+        // player inventory, abilities or dimension progression.
+        if (Launch.classLoader.getResource(
+                "Reika/DragonAPI/Instantiable/Event/PlayerPlaceBlockEvent.class") != null) {
+            mixins.add("dragonapi.MixinPlayerPlaceBlockEventNullPlayer");
+        }
+
         // ChromatiCraft's Data Crystal assumes durability requests always have
         // NBT. NEI legitimately probes a clean ItemStack without NBT.
         if (Launch.classLoader.getResource(
