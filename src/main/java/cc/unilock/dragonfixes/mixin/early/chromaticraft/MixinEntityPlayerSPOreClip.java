@@ -21,7 +21,7 @@ import Reika.ChromatiCraft.Auxiliary.ChromaAux;
 public abstract class MixinEntityPlayerSPOreClip {
 
     @Inject(
-            method = { "func_145771_j(DDD)Z", "localPushOutOfBlocks(DDD)Z" },
+            method = "func_145771_j(DDD)Z",
             at = @At("HEAD"),
             cancellable = true,
             require = 1)
