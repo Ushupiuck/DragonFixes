@@ -1,4 +1,4 @@
-Personal Fork of DragonFixes; a crude attempt at trying to make DApi + Chromaticraft work in GTNH, courtesy of some AI work.
+Personal Fork of DragonFixes; a crude attempt at trying to make DApi + Chromaticraft work in GTNH, courtesy of some AI work. Original description below:
 
 
 
