@@ -1,3 +1,7 @@
+Personal Fork of DragonFixes; a crude attempt at trying to make DApi + Chromaticraft work in GTNH, courtesy of some AI work.
+
+
+
 # DragonFixes
 
 Various fixes for issues found in some of Reika's mods.
