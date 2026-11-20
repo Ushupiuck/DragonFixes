@@ -7,6 +7,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraft.launchwrapper.Launch;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +35,60 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
     @Override
     public List<String> getMixins(Set<String> loadedCoreMods) {
+        fixReikaJavaVersion();
         if (DragonFixesConfig.disableTickInterceptASM && loadedCoreMods.contains(DRAGON_REALM_ASM)) {
             disableTickIntercept();
         }
+        if (Launch.classLoader.getResource("com/colen/tempora/mixins/MixinWorldServer.class") != null
+                && Launch.classLoader.getResource(
+                        "Reika/DragonAPI/Instantiable/Event/BlockTickEvent.class") != null) {
+            return Collections.singletonList("world.MixinWorldServerTemporaCompat");
+        }
         return Collections.emptyList();
+    }
+
+    /**
+     * ReikaJVMParser assumes all JVM versions start with "1." and drops the first
+     * component. On Java 26 this turns [26, 0, 2, 1] into [0, 2, 1].
+     * Correct its existing mutable cache without altering Reika's class bytecode.
+     */
+    private static void fixReikaJavaVersion() {
+        String specification = System.getProperty("java.specification.version", "1.8");
+        int major;
+        try {
+            major = Integer.parseInt(specification.startsWith("1.")
+                    ? specification.substring(2) : specification.split("\\.")[0]);
+        } catch (NumberFormatException e) {
+            DragonFixes.LOGGER.warn("Unrecognized Java specification version: {}", specification, e);
+            return;
+        }
+        if (major <= 8) {
+            return; // Reika's legacy 1.x parser already handles Java 8 correctly.
+        }
+
+        try {
+            String version = System.getProperty("java.version", "");
+            String[] components = version.replaceAll("[^0-9.]", ".").split("\\.");
+            Class<?> parser = Class.forName(REIKA_JVM_PARSER, true, Launch.classLoader);
+            Field versionField = parser.getDeclaredField("version");
+            versionField.setAccessible(true);
+            int[] cached = (int[]) versionField.get(null);
+            if (cached == null || cached.length == 0) {
+                DragonFixes.LOGGER.warn("ReikaJVMParser.version is empty; skipping correction");
+                return;
+            }
+            int[] before = cached.clone();
+            cached[0] = major;
+            for (int i = 1; i < cached.length && i < components.length; i++) {
+                cached[i] = Integer.parseInt(components[i]);
+            }
+            if (!Arrays.equals(before, cached)) {
+                DragonFixes.LOGGER.info("Corrected Reika JVM version {} -> {} (runtime {})",
+                        Arrays.toString(before), Arrays.toString(cached), version);
+            }
+        } catch (ReflectiveOperationException | SecurityException | NumberFormatException e) {
+            DragonFixes.LOGGER.warn("Unable to correct Reika's cached Java version", e);
+        }
     }
 
     private static void disableTickIntercept() {
