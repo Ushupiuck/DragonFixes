@@ -3,8 +3,10 @@ package cc.unilock.dragonfixes;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 
 import cc.unilock.dragonfixes.compat.SubmergeableLiquidLoggedCompat;
+import cc.unilock.dragonfixes.compat.AE2CSVExportBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,5 +18,12 @@ public class DragonFixes {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         SubmergeableLiquidLoggedCompat.register();
+    }
+
+    @EventHandler
+    public void loadComplete(FMLLoadCompleteEvent event) {
+        // All mods have finished init/postInit. It is now safe for AE2 to
+        // enumerate other mods' creative-tab items on its CSV export thread.
+        AE2CSVExportBridge.startDeferred();
     }
 }

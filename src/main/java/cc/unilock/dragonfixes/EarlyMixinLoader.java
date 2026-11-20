@@ -55,6 +55,16 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
                 && replaceBrokenChromaPushoutPatch()) {
             mixins.add("chromaticraft.MixinEntityPlayerSPOreClip");
         }
+        // AE2's optional CSV exporter enumerates creative-tab subitems from a
+        // worker thread during init. ChromatiCraft's tiered plants transitively
+        // initialize its research singletons and can permanently poison them.
+        // Keep exporting, but start it after all mods finish initialization.
+        if (Launch.classLoader.getResource("appeng/core/AppEng.class") != null
+                && Launch.classLoader.getResource(
+                        "Reika/ChromatiCraft/Magic/Progression/ChromaResearchManager.class") != null) {
+            mixins.add("ae2.MixinAppEngDeferCSVExport");
+        }
+
         // If LiquidLogged actually stores the fluid, don't let Reika paint a
         // second, visual-only water surface over the same block.
         if (Launch.classLoader.getResource(
