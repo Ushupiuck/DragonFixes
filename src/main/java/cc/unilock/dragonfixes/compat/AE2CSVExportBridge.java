@@ -20,18 +20,17 @@ public final class AE2CSVExportBridge {
 
     private AE2CSVExportBridge() {}
 
-    /** @return true when the start was deferred and the caller should cancel it. */
-    public static boolean defer(Thread thread, String serviceName) {
-        if (loadComplete) {
-            return false;
+    /**
+     * Replaces only the Thread.start invocation in AppEng.startService.
+     * AE2 has already set the thread name/priority and logged the service.
+     */
+    public static void startOrDefer(Thread thread, String serviceName) {
+        if (!"AE2 CSV Export".equals(serviceName) || loadComplete) {
+            thread.start();
+            return;
         }
-
-        // Match AE2's original AppEng.startService configuration.
-        thread.setName(serviceName);
-        thread.setPriority(Thread.MIN_PRIORITY);
         DEFERRED.add(thread);
-        DragonFixes.LOGGER.info("Deferred {} until after Forge mod loading", serviceName);
-        return true;
+        DragonFixes.LOGGER.info("Deferred {} until Forge completes mod loading", serviceName);
     }
 
     public static void startDeferred() {
