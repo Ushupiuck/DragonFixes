@@ -63,6 +63,14 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             mixins.add("dragonapi.MixinPlayerPlaceBlockEventNullPlayer");
         }
 
+        // Reika's book GUI restores the last internal-navigation mouse position
+        // unconditionally, even on an initial open when it is still (0, 0).
+        // Preserve navigation cursor placement without warping on normal opens.
+        if (Launch.classLoader.getResource(
+                "Reika/ChromatiCraft/Base/ChromaBookGui.class") != null) {
+            mixins.add("chromaticraft.MixinChromaBookGuiMouseRestore");
+        }
+
         // ChromatiCraft's Data Crystal assumes durability requests always have
         // NBT. NEI legitimately probes a clean ItemStack without NBT.
         if (Launch.classLoader.getResource(
