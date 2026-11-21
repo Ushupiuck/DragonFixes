@@ -2,11 +2,17 @@ package cc.unilock.dragonfixes.mixin.early.chromaticraft;
 
 import net.minecraft.entity.player.EntityPlayer;
 
+import net.minecraft.launchwrapper.Launch;
+
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import Reika.ChromatiCraft.Base.ChromaBookGui;
@@ -44,6 +50,32 @@ public abstract class MixinChromaBookGuiMouseRestore {
         // BOOKPAGES and BOOKEMPTIES are container GUIs, not ChromaBookGui.
         dragonfixes$internalBookNavigation = next != null && next.isLexiconGUI()
                 && next != ChromaGuis.BOOKPAGES && next != ChromaGuis.BOOKEMPTIES;
+    }
+
+    /**
+     * LWJGL3ify's Mouse.getY() is measured from the bottom of the framebuffer,
+     * but Mouse.setCursorPosition delegates directly to SDL_WarpMouseInWindow,
+     * whose Y is measured from the top. Reika saves getY() during goTo() and
+     * restores it during initGui(), accidentally vertically mirroring the
+     * cursor on every book-page transition.
+     *
+     * Convert the coordinate only when LWJGL3ify is present. Native LWJGL2
+     * already uses bottom-origin Y for both methods.
+     */
+    @Redirect(
+            method = "initGui()V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lorg/lwjgl/input/Mouse;setCursorPosition(II)V",
+                    remap = false),
+            require = 1,
+            remap = false)
+    private void dragonfixes$restoreCorrectMouseY(int x, int y) {
+        if (Launch.classLoader.getResource("org/lwjglx/input/Mouse.class") != null) {
+            Mouse.setCursorPosition(x, Display.getHeight() - y);
+        } else {
+            Mouse.setCursorPosition(x, y);
+        }
     }
 
     @Inject(
