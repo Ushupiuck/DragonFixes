@@ -5,7 +5,10 @@ import com.gtnewhorizon.gtnhlib.config.ConfigurationManager;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,10 +26,41 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
     static {
         try {
+            migrateArtefactZoneShaderStrength();
             ConfigurationManager.registerConfig(DragonFixesConfig.class);
+            ConfigurationManager.registerConfig(DragonFixesVisualConfig.class);
         } catch (ConfigException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Preserve the user's existing strength when moving this live-editable
+     * setting out of the restart-required "general" config category.
+     * Called before registering the old config, which removes stale keys.
+     */
+    private static void migrateArtefactZoneShaderStrength() {
+        File mcDir = Launch.minecraftHome != null ? Launch.minecraftHome : new File(".");
+        File configFile = new File(new File(mcDir, "config"), "dragonfixes.cfg");
+        if (!configFile.isFile()) {
+            return;
+        }
+
+        Configuration config = new Configuration(configFile);
+        config.load();
+        if (!config.hasKey("general", "artefactZoneShaderStrength")
+                || config.hasKey("visual", "artefactZoneShaderStrength")) {
+            return;
+        }
+
+        Property original = config.getCategory("general").get("artefactZoneShaderStrength");
+        double strength = original.getDouble(0.25D);
+        if (Double.isNaN(strength)) {
+            strength = 0.25D;
+        }
+        config.get("visual", "artefactZoneShaderStrength", 0.25D)
+                .set(Math.max(0.0D, Math.min(1.0D, strength)));
+        config.save();
     }
 
     @Override

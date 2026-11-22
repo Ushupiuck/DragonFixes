@@ -1,7 +1,7 @@
 package cc.unilock.dragonfixes.mixin.late.chromaticraft.client;
 
 import Reika.ChromatiCraft.Registry.ChromaShaders;
-import cc.unilock.dragonfixes.DragonFixesConfig;
+import cc.unilock.dragonfixes.DragonFixesVisualConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,6 +39,6 @@ public abstract class ChromaShadersMixin {
 
     @Unique
     private static float dragonfixes$getArtefactZoneStrength() {
-        return Math.max(0.0F, Math.min(1.0F, DragonFixesConfig.artefactZoneShaderStrength));
+        return Math.max(0.0F, Math.min(1.0F, DragonFixesVisualConfig.artefactZoneShaderStrength));
     }
 }

@@ -14,7 +14,7 @@ Fixes:
 - CaveControl
   - Prevents `CaveLoader#getEffectiveBiome` from ever returning a null biome, fixing crashes usually caused by pylon chunk loading (thegamemaster1234)
 - ChromatiCraft
-  - Configurable `artefactZoneShaderStrength` (default `0.25`) softens the Unknown Artefact zone edge-glow shader; `0` disables it and `1` restores the original effect (client-side)
+  - Live-adjustable `visual.artefactZoneShaderStrength` (default `0.25`) softens the Unknown Artefact zone edge-glow shader; `0` disables it and `1` restores the original effect (client-side, no restart). Existing `general` values are automatically migrated.
   - Prevents crashes in `ChromaClientEventController#updateGlowCliffRendering` (thegamemaster1234)
   - Fixes the loadTransferRects method in a few NEI handlers, making them able to load with GTNH!NEI (FlamingKetchup)
   - Adds support for Xaero's maps where appropriate (unilock)
