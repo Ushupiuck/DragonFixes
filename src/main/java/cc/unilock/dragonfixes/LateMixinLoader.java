@@ -33,6 +33,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("chromaticraft.client.accessor.WarpPointAccessor");
                 mixins.add("chromaticraft.client.ChromaClientEventControllerMixin");
                 mixins.add("chromaticraft.client.ChromaShadersMixin");
+                mixins.add("chromaticraft.client.ShaderProgramArtefactGlowMixin");
                 mixins.add("chromaticraft.client.ChromaDimensionManagerMixin");
                 mixins.add("chromaticraft.client.CrystalFurnaceHandlerMixin");
                 mixins.add("chromaticraft.client.CrystalGlowRendererMixin");

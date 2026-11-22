@@ -1,8 +1,11 @@
 package cc.unilock.dragonfixes.mixin.late.chromaticraft.client;
 
 import Reika.ChromatiCraft.Registry.ChromaShaders;
+import Reika.DragonAPI.IO.Shaders.ShaderProgram;
 import cc.unilock.dragonfixes.DragonFixesVisualConfig;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -16,6 +19,17 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  */
 @Mixin(value = ChromaShaders.class, remap = false)
 public abstract class ChromaShadersMixin {
+
+    // The glow ceiling is a shader uniform: adjusting it does not require a restart.
+    @Inject(method = "onPreRender", at = @At("TAIL"))
+    private void dragonfixes$updateArtefactGlowCeiling(ShaderProgram shader, CallbackInfo ci) {
+        if ((Object) this == ChromaShaders.UAZONE) {
+            shader.setField(
+                    "dragonfixesGlowCeiling",
+                    Math.max(0.0F, Math.min(1.0F, DragonFixesVisualConfig.artefactZoneGlowBrightnessCeiling)));
+        }
+    }
+
     @ModifyArg(
             method = "onPreRender",
             at = @At(value = "INVOKE", target = "LReika/DragonAPI/IO/Shaders/ShaderProgram;setIntensity(F)V", remap = false),

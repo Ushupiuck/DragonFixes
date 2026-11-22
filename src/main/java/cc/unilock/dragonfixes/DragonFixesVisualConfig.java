@@ -12,4 +12,9 @@ public class DragonFixesVisualConfig {
     @Config.DefaultFloat(0.25F)
     @Config.RangeFloat(min = 0.0F, max = 1.0F)
     public static float artefactZoneShaderStrength;
+
+    @Config.Comment("Maximum brightness of added ChromatiCraft Unknown Artefact zone glow, per color channel. Original scene brightness is preserved; 1 = original unlimited glow, 0.65 = softer highlights. Takes effect immediately.")
+    @Config.DefaultFloat(0.65F)
+    @Config.RangeFloat(min = 0.0F, max = 1.0F)
+    public static float artefactZoneGlowBrightnessCeiling;
 }
