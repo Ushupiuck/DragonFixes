@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("ChromatiCraft Unknown Artefact zone outline shader strength: 0 = off, 0.25 = subtle, 1 = original. Client-side visual effect only.")
+    @Config.DefaultFloat(0.25F)
+    @Config.RangeFloat(min = 0.0F, max = 1.0F)
+    public static float artefactZoneShaderStrength;
+
     @Config.Comment("Disables the hardcoded checks for Void Monster spawning in certain dimensions, instead always respecting the config")
     @Config.DefaultBoolean(false)
     public static boolean disableVoidMonsterHardcode;
