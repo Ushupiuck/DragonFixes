@@ -63,7 +63,8 @@ public abstract class MixinChromaBookGuiMouseRestore {
      * already uses bottom-origin Y for both methods.
      */
     @Redirect(
-            method = "initGui()V",
+            // Reika overrides the vanilla method, so the runtime name is SRG.
+            method = "func_73866_w_()V",
             at = @At(
                     value = "INVOKE",
                     target = "Lorg/lwjgl/input/Mouse;setCursorPosition(II)V",
