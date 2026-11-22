@@ -26,8 +26,9 @@ public abstract class ChromaShadersMixin {
                 : original;
     }
 
+    // DragonAPI checks isEnabled before onPreRender; updateEnabled must also honor "off".
     @ModifyArg(
-            method = "onPreRender",
+            method = {"onPreRender", "updateEnabled"},
             at = @At(value = "INVOKE", target = "LReika/DragonAPI/IO/Shaders/ShaderProgram;setEnabled(Z)V", remap = false),
             index = 0)
     private boolean dragonfixes$enableArtefactZoneShader(boolean original) {
