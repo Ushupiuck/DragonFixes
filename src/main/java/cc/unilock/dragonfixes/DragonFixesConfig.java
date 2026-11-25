@@ -12,7 +12,7 @@ public class DragonFixesConfig {
     @Config.DefaultBoolean(false)
     public static boolean disableVoidMonsterNetherRoof;
 
-    @Config.Comment("Disables IFluidHandler WAILA plugins from Reika's mods, in favor of something better")
+    @Config.Comment("Suppresses Reika's native fluid tank tooltip lines in ChromatiCraft, RotaryCraft and ReactorCraft to avoid duplicate information when WAILAPlugins' IFluidHandler provider is enabled.")
     @Config.DefaultBoolean(false)
     public static boolean disableWailaPlugins;
 

@@ -4,6 +4,7 @@ import Reika.ChromatiCraft.Registry.ChromaBlocks;
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,5 +19,11 @@ public class ChromaBlocksMixin {
             return original % 6;
         }
         return original;
+    }
+
+    @ModifyReturnValue(method = "hasMultiValuedName", at = @At("RETURN"), require = 1)
+    private boolean dragonfixes$fixFluidNames(boolean original) {
+        ChromaBlocks block = (ChromaBlocks) (Object) this;
+        return original && block != ChromaBlocks.ENDER && block != ChromaBlocks.MOLTENLUMEN;
     }
 }

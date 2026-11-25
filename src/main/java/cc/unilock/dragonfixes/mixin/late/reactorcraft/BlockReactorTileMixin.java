@@ -15,6 +15,6 @@ public class BlockReactorTileMixin {
     @Expression("? instanceof IFluidHandler")
     @ModifyExpressionValue(method = "getWailaBody", at = @At(value = "MIXINEXTRAS:EXPRESSION"))
     private boolean getWailaBody$IFluidHandler(boolean original) {
-        return !DragonFixesConfig.disableWailaPlugins;
+        return original && !DragonFixesConfig.disableWailaPlugins;
     }
 }
