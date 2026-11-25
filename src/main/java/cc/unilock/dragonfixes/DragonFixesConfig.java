@@ -36,7 +36,7 @@ public class DragonFixesConfig {
     @Config.RequiresMcRestart
     public static boolean replaceRubberWithGemLatex;
 
-    @Config.Comment("Updates Climate Control's ChromatiCraft biome package and preserves custom shores and rivers. Changing this can cause borders between old and new chunks.")
+    @Config.Comment("Uses DragonAPI's native ChromatiCraft biome registration in Climate Control, refreshes stale biome IDs, and forwards custom shoreline and river placement to DragonAPI events. Changing this can cause borders between old and new chunks.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
     @Config.RequiresMod(value = {"climatecontrol", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = BiomeSettings.class, remap = false)
 public abstract class BiomeSettingsMixin {
     // A saved dimension's config may overwrite the IDs after setNativeBiomeIDs.
-    // Refresh only the Reika package immediately before Climate Control consumes them.
+    // Refresh only DragonAPI's replacement Reika package immediately before Climate Control consumes them.
     @Inject(method = "incidences", at = @At("HEAD"), require = 1)
     private void dragonfixes$syncIncidences(CallbackInfoReturnable<ArrayList<ClimateDistribution.Incidence>> cir) {
         ClimateControlChromaBiomes.synchronize((BiomeSettings) (Object) this);

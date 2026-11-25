@@ -1,17 +1,21 @@
 package cc.unilock.dragonfixes.compat;
 
 import Reika.ChromatiCraft.ChromatiCraft;
+import Reika.DragonAPI.ModInteract.ReikaClimateControl;
+import cc.unilock.dragonfixes.DragonFixes;
 import climateControl.api.BiomeSettings;
-import climateControl.biomeSettings.ReikasBiomeSettings;
 
 import net.minecraft.world.biome.BiomeGenBase;
 
-/** Synchronize IDs after Climate Control reads a world-specific configuration. */
+/** Restore native IDs if a saved Climate Control config overwrites them. */
 public final class ClimateControlChromaBiomes {
     private ClimateControlChromaBiomes() {}
 
     public static void synchronize(BiomeSettings settings) {
-        if (!(settings instanceof ReikasBiomeSettings)) return;
+        // DragonAPI replaces ReikasPackage.freshBiomeSetting() with its own
+        // implementation. Do not create new entries, change weights, or modify
+        // the activation and climate settings managed by that package.
+        if (!((Object) settings instanceof ReikaClimateControl)) return;
 
         for (BiomeSettings.Element element : settings.elements()) {
             switch (element.name) {
@@ -24,14 +28,6 @@ public final class ClimateControlChromaBiomes {
                 case "Luminous Cliffs":
                     setRegisteredID(element, ChromatiCraft.glowingcliffs);
                     break;
-                case "Island":
-                case "Plains":
-                case "Skyland":
-                    // These no longer exist in ChromatiCraft. Never select an unrelated
-                    // mod's biome just because it occupies one of their old numeric IDs.
-                    element.biomeID().set(-1);
-                    element.biomeIncidences().set(0);
-                    break;
                 default:
                     break;
             }
@@ -39,8 +35,11 @@ public final class ClimateControlChromaBiomes {
     }
 
     private static void setRegisteredID(BiomeSettings.Element element, BiomeGenBase biome) {
-        // Early config loading may precede ChromatiCraft's biome registration.
-        if (biome != null) element.setIDFrom(biome);
+        if (biome == null || element.biomeID().value() == biome.biomeID) return;
+        int previous = element.biomeID().value();
+        element.setIDFrom(biome);
+        DragonFixes.LOGGER.info("Climate Control: restored native ID for {} ({} -> {})",
+                element.name, previous, element.biomeID().value());
     }
 
     public static boolean isVanillaBeach(int id) {

@@ -85,7 +85,6 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("rtg.RealisticBiomePresenceTesterMixin");
         }
         if (climateControl && chromaticraft && DragonFixesConfig.fixClimateControlChromaBiomeIntegration) {
-            mixins.add("climatecontrol.ReikasBiomeSettingsMixin");
             mixins.add("climatecontrol.BiomeSettingsMixin");
             mixins.add("climatecontrol.GenLayerShoreMixin");
             mixins.add("climatecontrol.GenLayerLowlandRiverMixMixin");
