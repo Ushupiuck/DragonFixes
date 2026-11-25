@@ -3,6 +3,7 @@ package cc.unilock.dragonfixes.mixin.late.rwg1;
 import Reika.ChromatiCraft.Registry.ChromaOptions;
 import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import cc.unilock.dragonfixes.compat.Rwg1ChromaBiomes;
+import cc.unilock.dragonfixes.compat.Rwg1StreamPreview;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
@@ -19,7 +20,18 @@ import rwg.util.NoiseGenerator;
 import rwg.world.ChunkManagerRealistic;
 
 @Mixin(value = ChunkManagerRealistic.class, remap = false)
-public abstract class ChunkManagerRealisticMixin {
+public abstract class ChunkManagerRealisticMixin implements Rwg1StreamPreview.Access {
+    @Unique private Rwg1StreamPreview dragonfixes$streamPreview;
+
+    @Override
+    public Rwg1StreamPreview dragonfixes$getStreamPreview() {
+        return dragonfixes$streamPreview;
+    }
+
+    @Override
+    public void dragonfixes$setStreamPreview(Rwg1StreamPreview preview) {
+        dragonfixes$streamPreview = preview;
+    }
     @Shadow private NoiseGenerator perlin;
     @Shadow private CellNoise cell;
     @Shadow public abstract float getOceanValue(int x, int z);

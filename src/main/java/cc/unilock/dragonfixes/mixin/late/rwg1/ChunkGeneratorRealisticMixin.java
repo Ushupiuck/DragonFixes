@@ -4,6 +4,11 @@ import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
 import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import cc.unilock.dragonfixes.compat.Rwg1ChromaBiomes;
+import cc.unilock.dragonfixes.compat.Rwg1StreamPreview;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Shadow;
+import rwg.util.NoiseGenerator;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -19,7 +24,51 @@ import rwg.world.ChunkGeneratorRealistic;
 import rwg.world.ChunkManagerRealistic;
 
 @Mixin(value = ChunkGeneratorRealistic.class, remap = false)
-public abstract class ChunkGeneratorRealisticMixin {
+public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview {
+    @Shadow @Final private ChunkManagerRealistic cmr;
+    @Shadow @Final private NoiseGenerator perlin;
+    @Shadow @Final private float[] mapGenBiomes;
+    @Shadow @Final private float[] testHeight;
+    @Shadow @Final private float[] riverStrength;
+    @Shadow public abstract float[] getNewNoise(ChunkManagerRealistic manager, int x, int z,
+            RealisticBiomeBase[] biomes);
+
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
+    private void dragonfixes$attachPreview(World world, long seed, CallbackInfo ci) {
+        if (cmr instanceof Rwg1StreamPreview.Access) {
+            ((Rwg1StreamPreview.Access) cmr).dragonfixes$setStreamPreview(this);
+        }
+    }
+
+    // Exact predicate used by replaceBlocksForBiome, including its short-scale noise.
+    @Unique
+    private boolean dragonfixes$isRiverColumn(int x, int z, float river) {
+        return river > 0.05f && river + perlin.noise2(x / 10f, z / 10f) * 0.15f > 0.8f;
+    }
+
+    @Override
+    public BiomeGenBase dragonfixes$previewStream(int x, int z) {
+        if (!dragonfixes$isRiverColumn(x, z, -cmr.getRiverStrength(x, z))) return null;
+
+        // Nature's Compass executes its worker on the server tick. getNewNoise uses
+        // reusable interpolation scratch buffers; its persistent output arrays must
+        // not be left with the preview chunk's heights or map-generation weights.
+        float[] oldWeights = mapGenBiomes.clone();
+        float[] oldHeights = testHeight.clone();
+        float[] oldRivers = riverStrength.clone();
+        RealisticBiomeBase[] predicted = new RealisticBiomeBase[256];
+        try {
+            getNewNoise(cmr, x & ~15, z & ~15, predicted);
+            RealisticBiomeBase biome = predicted[(z & 15) * 16 + (x & 15)];
+            if (biome == null || biome.baseBiome != ChromatiCraft.rainbowforest) return null;
+            return ChromaBiomeEvents.river(biome.baseBiome, biome.riverBiome);
+        } finally {
+            System.arraycopy(oldWeights, 0, mapGenBiomes, 0, oldWeights.length);
+            System.arraycopy(oldHeights, 0, testHeight, 0, oldHeights.length);
+            System.arraycopy(oldRivers, 0, riverStrength, 0, oldRivers.length);
+        }
+    }
+
     @Unique private boolean dragonfixes$loggedCliffs;
     @Unique private boolean dragonfixes$loggedShores;
     @Unique private boolean dragonfixes$loggedStream;

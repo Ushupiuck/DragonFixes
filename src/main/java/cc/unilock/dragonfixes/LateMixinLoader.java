@@ -75,6 +75,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("rwg1.SupportCCMixin");
             mixins.add("rwg1.ChunkManagerRealisticMixin");
             mixins.add("rwg1.ChunkGeneratorRealisticMixin");
+            if (loadedMods.contains("naturescompass")) {
+                mixins.add("rwg1.BiomeSearchWorkerMixin");
+            }
         }
         if (rwg2 && chromaticraft) {
             if (DragonFixesConfig.overrideChromaClimate || DragonFixesConfig.fixChromaBiomeIntegration) {
