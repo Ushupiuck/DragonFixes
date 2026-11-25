@@ -35,6 +35,13 @@ public class DragonFixesConfig {
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
     public static boolean replaceRubberWithGemLatex;
+
+    @Config.Comment("Updates Climate Control's ChromatiCraft biome package and preserves custom shores and rivers. Changing this can cause borders between old and new chunks.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"climatecontrol", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static boolean fixClimateControlChromaBiomeIntegration;
+
     @Config.Comment("Fixes ChromatiCraft biome discovery, Shores and Rainbow Stream support, and biome repair in RTG. Changing this can cause borders between old and new chunks.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart

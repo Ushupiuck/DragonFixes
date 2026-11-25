@@ -22,6 +22,7 @@ public class LateMixinLoader implements ILateMixinLoader {
         final boolean dragonapi = loadedMods.contains("DragonAPI");
         final boolean rwg2 = loadedMods.contains("rwg2");
         final boolean rtg = loadedMods.contains("RTG");
+        final boolean climateControl = loadedMods.contains("climatecontrol");
         final boolean reactorcraft = loadedMods.contains("ReactorCraft");
         final boolean rotarycraft = loadedMods.contains("RotaryCraft");
         final boolean satisforestry = loadedMods.contains("Satisforestry");
@@ -82,6 +83,12 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("rtg.RealisticBiomeCCBaseMixin");
             mixins.add("rtg.BiomeAnalyzerMixin");
             mixins.add("rtg.RealisticBiomePresenceTesterMixin");
+        }
+        if (climateControl && chromaticraft && DragonFixesConfig.fixClimateControlChromaBiomeIntegration) {
+            mixins.add("climatecontrol.ReikasBiomeSettingsMixin");
+            mixins.add("climatecontrol.BiomeSettingsMixin");
+            mixins.add("climatecontrol.GenLayerShoreMixin");
+            mixins.add("climatecontrol.GenLayerLowlandRiverMixMixin");
         }
         if (dragonapi) {
             mixins.add("dragonapi.AbstractSearchFoundPathMixin");
