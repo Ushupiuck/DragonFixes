@@ -35,6 +35,12 @@ public class DragonFixesConfig {
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
     public static boolean replaceRubberWithGemLatex;
+    @Config.Comment("Fixes ChromatiCraft biome discovery, Shores and Rainbow Stream support, and biome repair in RTG. Changing this can cause borders between old and new chunks.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"RTG", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static boolean fixRtgChromaBiomeIntegration;
+
     @Config.Comment("Restores ChromatiCraft's parent-dependent Luminous Cliffs Shores and custom river biome rules in RWG2. Changing this can cause borders between old and new chunks.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
