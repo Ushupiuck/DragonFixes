@@ -2,6 +2,7 @@ package cc.unilock.dragonfixes.mixin.late.rtg;
 
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
+import cc.unilock.dragonfixes.DragonFixesConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +21,8 @@ public abstract class WorldChunkManagerRTGMixin {
 
     @Inject(method = "getBiomeDataAt", at = @At("RETURN"), require = 1)
     private void dragonfixes$reportRawCliffs(int x, int z, CallbackInfoReturnable<RealisticBiomeBase> cir) {
-        if (dragonfixes$loggedRawCliffs || ChromatiCraft.glowingcliffs == null) return;
+        if (!DragonFixesConfig.enableBiomeGenerationDiagnostics || dragonfixes$loggedRawCliffs
+                || ChromatiCraft.glowingcliffs == null) return;
         RealisticBiomeBase biome = cir.getReturnValue();
         if (biome != null && biome.baseBiome == ChromatiCraft.glowingcliffs) {
             dragonfixes$loggedRawCliffs = true;

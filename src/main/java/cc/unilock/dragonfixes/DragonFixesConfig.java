@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Enables troubleshooting logs and biome generation diagnostics for RWG1, RWG2, RTG and Climate Control. Does not change biome placement or compatibility fixes.")
+    @Config.DefaultBoolean(false)
+    @Config.RequiresMcRestart
+    public static boolean enableBiomeGenerationDiagnostics;
+
     @Config.Comment("Disables the hardcoded checks for Void Monster spawning in certain dimensions, instead always respecting the config")
     @Config.DefaultBoolean(false)
     public static boolean disableVoidMonsterHardcode;

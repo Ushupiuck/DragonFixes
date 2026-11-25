@@ -42,7 +42,9 @@ public final class RwgChromaClimate {
             DragonFixes.LOGGER.warn("{}: empty climate list for {}; retaining {}", generator, biome.biomeName, fallback);
             return EnumSet.of(fallback);
         }
-        DragonFixes.LOGGER.info("{} climate override: {} -> {}", generator, biome.biomeName, result);
+        if (DragonFixesConfig.enableBiomeGenerationDiagnostics) {
+            DragonFixes.LOGGER.info("{} climate override: {} -> {}", generator, biome.biomeName, result);
+        }
         return result;
     }
 }

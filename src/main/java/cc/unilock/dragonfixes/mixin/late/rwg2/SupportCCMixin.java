@@ -30,7 +30,9 @@ public class SupportCCMixin {
             } else if (base == ChromatiCraft.glowingcliffsEdge) {
                 // Keep the existing realistic wrapper, but do not put it in any independent climate pool.
                 RwgChromaBiomes.shores = biome;
-                DragonFixes.LOGGER.info("RWG2: {} derives from Luminous Cliffs coastlines", base.biomeName);
+                if (DragonFixesConfig.enableBiomeGenerationDiagnostics) {
+                    DragonFixes.LOGGER.info("RWG2: {} derives from Luminous Cliffs coastlines", base.biomeName);
+                }
                 return;
             }
         }

@@ -2,6 +2,7 @@ package cc.unilock.dragonfixes.mixin.late.rwg1;
 
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
+import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import cc.unilock.dragonfixes.compat.Rwg1ChromaBiomes;
 import cc.unilock.dragonfixes.compat.Rwg1StreamPreview;
@@ -41,7 +42,7 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
         if (cmr instanceof Rwg1StreamPreview.Access) {
             ((Rwg1StreamPreview.Access) cmr).dragonfixes$setStreamPreview(this);
         }
-        if (!world.isRemote) {
+        if (DragonFixesConfig.enableBiomeGenerationDiagnostics && !world.isRemote) {
             DragonFixes.LOGGER.info("RWG1: active chunk generator in dimension {} (seed {})",
                     world.provider.dimensionId, seed);
         }
@@ -103,7 +104,8 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     private BiomeGenBase dragonfixes$forwardRiverEvent(RealisticBiomeBase biome, Operation<BiomeGenBase> original) {
         BiomeGenBase planned = original.call(biome);
         BiomeGenBase resolved = ChromaBiomeEvents.river(biome.baseBiome, planned);
-        if (!dragonfixes$loggedRiverEvent && biome.baseBiome == ChromatiCraft.rainbowforest) {
+        if (DragonFixesConfig.enableBiomeGenerationDiagnostics && !dragonfixes$loggedRiverEvent
+                && biome.baseBiome == ChromatiCraft.rainbowforest) {
             dragonfixes$loggedRiverEvent = true;
             DragonFixes.LOGGER.info("RWG1: first actual Rainbow Forest river event: planned={}, resolved={}",
                     planned == null ? "null" : planned.biomeName, resolved == null ? "null" : resolved.biomeName);
@@ -114,6 +116,7 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     @Inject(method = "replaceBlocksForBiome", at = @At("RETURN"), require = 1)
     private void dragonfixes$reportFinalBiomes(int cx, int cz, net.minecraft.block.Block[] blocks, byte[] metadata,
             RealisticBiomeBase[] biomes, BiomeGenBase[] base, float[] heights, CallbackInfo ci) {
+        if (!DragonFixesConfig.enableBiomeGenerationDiagnostics) return;
         if (dragonfixes$loggedCliffs && dragonfixes$loggedShores && dragonfixes$loggedStream
                 && dragonfixes$loggedRainbowForest) return;
         int forest = 0;

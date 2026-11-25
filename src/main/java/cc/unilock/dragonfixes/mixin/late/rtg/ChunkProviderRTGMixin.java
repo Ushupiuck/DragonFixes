@@ -2,6 +2,7 @@ package cc.unilock.dragonfixes.mixin.late.rtg;
 
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
+import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.RtgLandscapeAccess;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.world.World;
@@ -38,6 +39,7 @@ public abstract class ChunkProviderRTGMixin implements RtgLandscapeAccess {
             at = @At(value = "INVOKE", target = "Lrtg/world/gen/LandscapeGenerator;landscape(Lrtg/world/biome/RTGBiomeProvider;II)Lrtg/world/gen/ChunkLandscape;", remap = false),
             require = 1)
     private ChunkLandscape dragonfixes$reportStreamGeneration(ChunkLandscape landscape, int chunkX, int chunkZ) {
+        if (!DragonFixesConfig.enableBiomeGenerationDiagnostics) return landscape;
         if (!dragonfixes$loggedStream && ChromatiCraft.rainbowRiver != null) {
             int count = 0;
             for (RealisticBiomeBase biome : landscape.biome) {

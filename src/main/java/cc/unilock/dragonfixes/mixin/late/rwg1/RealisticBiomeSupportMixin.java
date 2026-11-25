@@ -4,6 +4,7 @@ import java.util.Random;
 
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
+import cc.unilock.dragonfixes.DragonFixesConfig;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.World;
@@ -36,7 +37,7 @@ public abstract class RealisticBiomeSupportMixin {
         // Never generate a new chunk solely to decide which decorator to use.
         if (!world.getChunkProvider().chunkExists(x >> 4, z >> 4)) return parent;
         if (world.getBiomeGenForCoordsBody(x, z) != ChromatiCraft.rainbowRiver) return parent;
-        if (!dragonfixes$loggedStreamDecoration) {
+        if (DragonFixesConfig.enableBiomeGenerationDiagnostics && !dragonfixes$loggedStreamDecoration) {
             dragonfixes$loggedStreamDecoration = true;
             DragonFixes.LOGGER.info("RWG1: using native Rainbow Stream decorator at population origin {}, {}", chunkX, chunkZ);
         }
