@@ -48,33 +48,35 @@ public class DragonFixesConfig {
     @Config.RequiresMod(value = {"RTG", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
     public static boolean fixRtgChromaBiomeIntegration;
 
+    @Config.Comment("Registers native ChromatiCraft biomes in RWG1, derives cliff shores from adjacent water, and forwards river placement to DragonAPI. Changes biome lists; use new worlds or expect chunk borders.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"RWG", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static boolean fixRwg1ChromaBiomeIntegration;
+
     @Config.Comment("Restores ChromatiCraft's parent-dependent Luminous Cliffs Shores and custom river biome rules in RWG2. Changing this can cause borders between old and new chunks.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
     @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
     public static boolean fixChromaBiomeIntegration;
 
-    @Config.Comment("Overrides RWG2's climate pools for ChromatiCraft biomes. Changing these settings can cause borders between old and new chunks. Disable to retain RWG2's original placement.")
+    @Config.Comment("Overrides RWG1/RWG2's climate pools for ChromatiCraft biomes. Changing these settings can cause borders between old and new chunks. Disable to retain RWG1/RWG2's original placement.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
-    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
-    public static boolean overrideChromaClimate;
+        public static boolean overrideChromaClimate;
 
-    @Config.Comment("RWG2 climate pools for Rainbow Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG2's original placement.")
+    @Config.Comment("RWG1/RWG2 climate pools for Rainbow Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
     @Config.DefaultStringList({"COLD"})
     @Config.RequiresMcRestart
-    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
-    public static String[] rainbowForestClimate;
+        public static String[] rainbowForestClimate;
 
-    @Config.Comment("RWG2 climate pools for Ender Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG2's original placement.")
+    @Config.Comment("RWG1/RWG2 climate pools for Ender Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
     @Config.DefaultStringList({"COLD"})
     @Config.RequiresMcRestart
-    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
-    public static String[] enderForestClimate;
+        public static String[] enderForestClimate;
 
-    @Config.Comment("RWG2 climate pools for Luminous Cliffs. Shores follow their parent when fixChromaBiomeIntegration is enabled; otherwise both are independently registered in these pools. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG2's original placement.")
+    @Config.Comment("RWG1/RWG2 climate pools for Luminous Cliffs. Shores follow their parent when fixChromaBiomeIntegration is enabled; otherwise both are independently registered in these pools. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
     @Config.DefaultStringList({"COLD"})
     @Config.RequiresMcRestart
-    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
-    public static String[] luminousCliffsClimate;
+        public static String[] luminousCliffsClimate;
 }

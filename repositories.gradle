@@ -4,6 +4,15 @@ repositories {
     // These releases ship deobfuscated development jars on GitHub, but are not
     // published under their repository names in the GTNH Maven repository.
     ivy {
+        name = "RWGReleaseArtifacts"
+        url = uri("https://github.com/GTNewHorizons/Realistic-World-Gen/releases/download")
+        patternLayout {
+            artifact("[revision]/[artifact]-[revision](-[classifier]).[ext]")
+        }
+        metadataSources { artifact() }
+        content { includeModule("github.release", "RWG") }
+    }
+    ivy {
         name = "RTGReleaseArtifacts"
         url = uri("https://github.com/GTNewHorizons/Realistic-Terrain-Generation/releases/download")
         patternLayout {
