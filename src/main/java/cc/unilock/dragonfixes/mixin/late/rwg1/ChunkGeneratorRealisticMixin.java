@@ -83,9 +83,20 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
         return ChromaBiomeEvents.river(biome.baseBiome, biome.riverBiome);
     }
 
-    // The single `if (b != null)` after interpolation is the dominant-biome
-    // check, immediately before the column loop. No terrain output has been
-    // written yet, and ordinary generation pays only one cheap check per chunk.
+    // The first mix4 call follows the upstream >0.95 dominant-biome check.
+    // Dominant previews do not need any of the remaining interpolation stages.
+    @Inject(method = "getNewNoise",
+            at = @At(value = "INVOKE", target = "Lrwg/world/ChunkGeneratorRealistic;mix4([[F[F)V", ordinal = 0),
+            cancellable = true, require = 1, allow = 1)
+    private void dragonfixes$finishDominantPreview(ChunkManagerRealistic manager, int x, int z,
+            RealisticBiomeBase[] biomes, CallbackInfoReturnable<float[]> cir,
+            @Local RealisticBiomeBase dominant) {
+        if (biomes != dragonfixes$previewBiomes || dragonfixes$previewIndex < 0 || dominant == null) return;
+        dragonfixes$finishPreview(manager, x, z, biomes, dominant, cir);
+    }
+
+    // Mixed-biome previews still need the full upstream interpolation. Stop
+    // before the terrain column loop writes any persistent generator output.
     @Inject(method = "getNewNoise", at = @At(value = "JUMP", opcode = Opcodes.IFNULL),
             cancellable = true, require = 1, allow = 1)
     private void dragonfixes$finishBiomeOnlyPreview(ChunkManagerRealistic manager, int x, int z,
@@ -95,15 +106,22 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
         int index = dragonfixes$previewIndex;
         int localX = index & 15;
         int localZ = index >> 4;
-        RealisticBiomeBase selected = dominant; // RWG's >0.95 dominant-biome selection, if any.
+        RealisticBiomeBase selected = dominant;
         if (selected == null) {
             int id = Rwg1BiomeSelection.select(
                     smallRender[(localX + 4) * 25 + (localZ + 4)],
                     perlin.noise2((float) (x + localX) / 15f, (float) (z + localZ) / 15f));
             if (id >= 0) selected = RealisticBiomeBase.getBiome(id);
         }
+        dragonfixes$finishPreview(manager, x, z, biomes, selected, cir);
+    }
+
+    @Unique
+    private void dragonfixes$finishPreview(ChunkManagerRealistic manager, int x, int z,
+            RealisticBiomeBase[] biomes, RealisticBiomeBase selected, CallbackInfoReturnable<float[]> cir) {
+        int index = dragonfixes$previewIndex;
         if (Rwg1ChromaBiomes.cliffs != null && Rwg1ChromaBiomes.shores != null) {
-            selected = dragonfixes$alignCliffColumn(manager.getBiomeDataAt(x + localX, z + localZ), selected);
+            selected = dragonfixes$alignCliffColumn(manager.getBiomeDataAt(x + (index & 15), z + (index >> 4)), selected);
         }
         biomes[index] = selected;
         // The caller only consumes the selected biome, never this height array.
