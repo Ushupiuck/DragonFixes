@@ -1,8 +1,8 @@
 package cc.unilock.dragonfixes.mixin.late.climatecontrol;
 
 import Reika.ChromatiCraft.ChromatiCraft;
-import Reika.DragonAPI.Instantiable.Event.GenLayerBeachEvent;
-import cc.unilock.dragonfixes.compat.ClimateControlChromaBiomes;
+import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
+import net.minecraft.world.biome.BiomeGenBase;
 import climateControl.customGenLayer.GenLayerPrettyShore;
 import climateControl.customGenLayer.GenLayerShoreCC;
 import climateControl.genLayerPack.GenLayerShore;
@@ -29,8 +29,8 @@ public abstract class GenLayerShoreMixin {
             for (int dx = 0; dx < width; dx++) {
                 int i = dx + dz * width;
                 if (parentBiomes[dx + 1 + (dz + 1) * parentWidth] == cliffs
-                        && ClimateControlChromaBiomes.isVanillaBeach(result[i])) {
-                    result[i] = GenLayerBeachEvent.fire(ChromatiCraft.glowingcliffs, result[i]);
+                        && ChromaBiomeEvents.isVanillaBeach(result[i])) {
+                    result[i] = ChromaBiomeEvents.beach(ChromatiCraft.glowingcliffs, BiomeGenBase.getBiome(result[i])).biomeID;
                 }
             }
         }

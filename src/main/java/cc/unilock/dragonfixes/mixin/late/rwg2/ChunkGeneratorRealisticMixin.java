@@ -1,6 +1,6 @@
 package cc.unilock.dragonfixes.mixin.late.rwg2;
 
-import Reika.ChromatiCraft.ChromatiCraft;
+import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import cc.unilock.dragonfixes.compat.RwgChromaBiomes;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -50,20 +50,13 @@ public class ChunkGeneratorRealisticMixin {
         }
     }
 
-    // RWG2 bypasses DragonAPI's GenLayerRiverEvent, so mirror ChromatiCraft's river rules here.
+    // RWG2 bypasses DragonAPI's GenLayerRiverEvent; forward actual river placements.
     @WrapOperation(
             method = "replaceBlocksForBiome",
             at = @At(value = "FIELD", target = "Lrwg2/biomes/realistic/RealisticBiomeBase;riverBiome:Lnet/minecraft/world/biome/BiomeGenBase;", opcode = Opcodes.GETFIELD),
             require = 1)
     private BiomeGenBase dragonfixes$preserveChromaRiverBiomes(RealisticBiomeBase biome,
             Operation<BiomeGenBase> original) {
-        BiomeGenBase base = biome.baseBiome;
-        if (base == ChromatiCraft.glowingcliffs || base == ChromatiCraft.glowingcliffsEdge) {
-            return base;
-        }
-        if (base == ChromatiCraft.rainbowforest && ChromatiCraft.rainbowRiver != null) {
-            return ChromatiCraft.rainbowRiver;
-        }
-        return original.call(biome);
+        return ChromaBiomeEvents.river(biome.baseBiome, original.call(biome));
     }
 }

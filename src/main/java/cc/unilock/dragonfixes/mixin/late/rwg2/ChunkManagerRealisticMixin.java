@@ -3,6 +3,8 @@ package cc.unilock.dragonfixes.mixin.late.rwg2;
 import java.util.ArrayList;
 
 import cc.unilock.dragonfixes.compat.RwgChromaBiomes;
+import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
+import net.minecraft.world.biome.BiomeGenBase;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import org.objectweb.asm.Opcodes;
@@ -49,7 +51,8 @@ public abstract class ChunkManagerRealisticMixin {
 
         RealisticBiomeBase selected = output.get();
         if (selected == cliffs) {
-            output.set(shores);
+            BiomeGenBase resolved = ChromaBiomeEvents.beach(cliffs.baseBiome, BiomeGenBase.beach);
+            if (resolved == shores.baseBiome) output.set(shores);
             return;
         }
 
@@ -59,7 +62,9 @@ public abstract class ChunkManagerRealisticMixin {
         if (selected != RealisticBiomeBase.coastDunes && selected != RealisticBiomeBase.coastIce
                 && !littoralBiomes[climate - 1].contains(selected)) return;
         if (getLandBiomeAt(x, z, climate) == cliffs) {
-            output.set(shores);
+            BiomeGenBase resolved = ChromaBiomeEvents.beach(cliffs.baseBiome, selected.baseBiome);
+            if (resolved == shores.baseBiome) output.set(shores);
+            else if (resolved == cliffs.baseBiome) output.set(cliffs);
         }
     }
 }

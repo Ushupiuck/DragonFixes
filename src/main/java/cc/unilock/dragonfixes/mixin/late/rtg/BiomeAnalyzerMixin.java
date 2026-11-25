@@ -1,6 +1,7 @@
 package cc.unilock.dragonfixes.mixin.late.rtg;
 
 import Reika.ChromatiCraft.ChromatiCraft;
+import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -52,38 +53,42 @@ public abstract class BiomeAnalyzerMixin {
     @Inject(method = "newRepair", at = @At("RETURN"), require = 1)
     private void dragonfixes$preserveChromaBiomes(int[] genLayerBiomes, RealisticBiomeBase[] jitteredBiomes,
             int[] biomeNeighborhood, int neighborhoodSize, float[] noise, float[] riverStrength, CallbackInfo ci) {
-        if (!dragonfixes$hasWrapper(ChromatiCraft.glowingcliffs)
-                || !dragonfixes$hasWrapper(ChromatiCraft.glowingcliffsEdge)
-                || !dragonfixes$hasWrapper(ChromatiCraft.rainbowRiver)) return;
-
-        RealisticBiomeBase stream = RealisticBiomeBase.getBiome(ChromatiCraft.rainbowRiver.biomeID);
+        boolean cliffsReady = dragonfixes$hasWrapper(ChromatiCraft.glowingcliffs)
+                && dragonfixes$hasWrapper(ChromatiCraft.glowingcliffsEdge);
+        RealisticBiomeBase stream = dragonfixes$hasWrapper(ChromatiCraft.rainbowRiver)
+                ? RealisticBiomeBase.getBiome(ChromatiCraft.rainbowRiver.biomeID) : null;
         for (int i = 0; i < jitteredBiomes.length; i++) {
             int id = genLayerBiomes[xyinverted[i]];
             RealisticBiomeBase original = RealisticBiomeBase.getBiome(id);
             RealisticBiomeBase repaired = jitteredBiomes[i];
             if (original == null || repaired == null) continue;
 
-            if (original != repaired && (dragonfixes$isCliff(original.baseBiome) || dragonfixes$isCliff(repaired.baseBiome))) {
+            if (cliffsReady && original != repaired
+                    && (ChromaBiomeEvents.isCliff(original.baseBiome) || ChromaBiomeEvents.isCliff(repaired.baseBiome))) {
                 jitteredBiomes[i] = original;
             }
 
-            // Preserve native streams, and RTG-generated rivers within Rainbow Forest, even
-            // if later beach or ocean repair would have overwritten the river assignment.
-            if (original.baseBiome == ChromatiCraft.rainbowRiver
-                    || (original.baseBiome == ChromatiCraft.rainbowforest
-                        && noise[i] <= 61.5f && riverStrength[i] > 0.7f)) {
+            // Preserve native streams independently of cliffs.
+            if (stream != null && original.baseBiome == ChromatiCraft.rainbowRiver) {
                 jitteredBiomes[i] = stream;
+                continue;
+            }
+
+            // Let RTG decide the river geometry, then dispatch the native event
+            // after later repair passes can no longer erase the replacement.
+            if (noise[i] <= 61.5f && riverStrength[i] > 0.7f
+                    && ChromaBiomeEvents.isRiverParent(original.baseBiome)) {
+                BiomeGenBase resolved = ChromaBiomeEvents.river(original.baseBiome, original.riverBiome);
+                if (dragonfixes$hasWrapper(resolved)) {
+                    jitteredBiomes[i] = RealisticBiomeBase.getBiome(resolved.biomeID);
+                }
             }
         }
     }
 
     @Unique
-    private static boolean dragonfixes$isCliff(BiomeGenBase biome) {
-        return biome == ChromatiCraft.glowingcliffs || biome == ChromatiCraft.glowingcliffsEdge;
-    }
-
-    @Unique
     private static boolean dragonfixes$hasWrapper(BiomeGenBase biome) {
-        return biome != null && RealisticBiomeBase.getBiome(biome.biomeID) != null;
+        return biome != null && RealisticBiomeBase.getBiome(biome.biomeID) != null
+                && RealisticBiomeBase.getBiome(biome.biomeID).baseBiome == biome;
     }
 }

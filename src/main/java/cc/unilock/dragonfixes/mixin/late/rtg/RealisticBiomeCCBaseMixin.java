@@ -6,9 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import rtg.api.biome.BiomeConfig;
@@ -65,17 +63,4 @@ public abstract class RealisticBiomeCCBaseMixin {
         ci.cancel();
     }
 
-    // Supply the correct final riverBiome at construction, without mutating it afterward.
-    @ModifyArgs(
-            method = "<init>(Lrtg/api/biome/BiomeConfig;Lnet/minecraft/world/biome/BiomeGenBase;Lnet/minecraft/world/biome/BiomeGenBase;Lrtg/world/gen/terrain/TerrainBase;Lrtg/world/gen/surface/SurfaceBase;)V",
-            at = @At(value = "INVOKE", target = "Lrtg/world/biome/realistic/RealisticBiomeBase;<init>(Lrtg/api/biome/BiomeConfig;Lnet/minecraft/world/biome/BiomeGenBase;Lnet/minecraft/world/biome/BiomeGenBase;Lrtg/world/gen/terrain/TerrainBase;Lrtg/world/gen/surface/SurfaceBase;)V"),
-            require = 1)
-    private static void dragonfixes$correctRiverBiome(Args args) {
-        BiomeGenBase biome = args.get(1);
-        if (biome == ChromatiCraft.glowingcliffs || biome == ChromatiCraft.glowingcliffsEdge) {
-            args.set(2, biome);
-        } else if (biome == ChromatiCraft.rainbowforest && ChromatiCraft.rainbowRiver != null) {
-            args.set(2, ChromatiCraft.rainbowRiver);
-        }
-    }
 }

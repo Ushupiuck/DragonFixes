@@ -42,9 +42,4 @@ public final class ClimateControlChromaBiomes {
                 element.name, previous, element.biomeID().value());
     }
 
-    public static boolean isVanillaBeach(int id) {
-        return id == BiomeGenBase.beach.biomeID
-                || id == BiomeGenBase.stoneBeach.biomeID
-                || id == BiomeGenBase.coldBeach.biomeID;
-    }
 }
