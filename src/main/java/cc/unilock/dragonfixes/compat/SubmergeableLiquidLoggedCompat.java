@@ -1,5 +1,8 @@
 package cc.unilock.dragonfixes.compat;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -28,7 +31,7 @@ public final class SubmergeableLiquidLoggedCompat {
     private static final String API = "com.gtnewhorizons.liquidlogged.api.LiquidLoggedAPI";
     private static final String PREDICATE =
             "com.gtnewhorizons.liquidlogged.api.FluidHolderPredicate";
-    private static volatile Method getStoredFluid;
+    private static volatile MethodHandle getStoredFluid;
     private static final AtomicBoolean REGISTERED = new AtomicBoolean();
 
     private SubmergeableLiquidLoggedCompat() {}
@@ -44,8 +47,11 @@ public final class SubmergeableLiquidLoggedCompat {
             Class<?> holderType = Class.forName(
                     "com.gtnewhorizons.liquidlogged.api.IFluidHolder");
             Method registration = api.getMethod("registerPredicate", Block.class, predicateType);
-            getStoredFluid = api.getMethod("getFluid", IBlockAccess.class,
-                    int.class, int.class, int.class);
+            // Link once without introducing a hard LiquidLogged dependency. The
+            // render path invokes the handle with primitive coordinates, not varargs.
+            getStoredFluid = MethodHandles.publicLookup().unreflect(api.getMethod("getFluid", IBlockAccess.class,
+                    int.class, int.class, int.class)).asType(MethodType.methodType(Object.class,
+                            IBlockAccess.class, int.class, int.class, int.class));
 
             int count = 0;
             for (Object candidate : GameData.getBlockRegistry()) {
@@ -94,14 +100,15 @@ public final class SubmergeableLiquidLoggedCompat {
 
     /** Only consult the stored fluid for a Reika block that wants to draw water. */
     public static boolean hasStoredFluid(IBlockAccess world, int x, int y, int z) {
-        Method getter = getStoredFluid;
+        MethodHandle getter = getStoredFluid;
         if (getter == null) {
             return false;
         }
         try {
-            return getter.invoke(null, world, x, y, z) != null;
-        } catch (ReflectiveOperationException | LinkageError e) {
-            // Rendering must remain functional if LiquidLogged becomes unavailable.
+            return (Object) getter.invokeExact(world, x, y, z) != null;
+        } catch (Throwable e) {
+            // Method.invoke used to wrap any target failure in InvocationTargetException.
+            // Preserve that fallback when calling the same optional API via a handle.
             return false;
         }
     }
