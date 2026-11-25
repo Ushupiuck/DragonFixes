@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import rwg.util.NoiseGenerator;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -40,6 +41,8 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
             RealisticBiomeBase[] biomes);
     @Unique private final RealisticBiomeBase[] dragonfixes$previewBiomes = new RealisticBiomeBase[256];
     @Unique private int dragonfixes$previewIndex = -1;
+    @Unique private final float[] dragonfixes$oceanValues = new float[256];
+    @Unique private int dragonfixes$oceanCursor;
 
     @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     private void dragonfixes$attachPreview(World world, long seed, CallbackInfo ci) {
@@ -99,7 +102,10 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
                     perlin.noise2((float) (x + localX) / 15f, (float) (z + localZ) / 15f));
             if (id >= 0) selected = RealisticBiomeBase.getBiome(id);
         }
-        biomes[index] = dragonfixes$alignCliffColumn(manager, x + localX, z + localZ, selected);
+        if (Rwg1ChromaBiomes.cliffs != null && Rwg1ChromaBiomes.shores != null) {
+            selected = dragonfixes$alignCliffColumn(manager.getBiomeDataAt(x + localX, z + localZ), selected);
+        }
+        biomes[index] = selected;
         // The caller only consumes the selected biome, never this height array.
         cir.setReturnValue(testHeight);
     }
@@ -108,6 +114,27 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     @Unique private boolean dragonfixes$loggedShores;
     @Unique private boolean dragonfixes$loggedStream;
 
+    @Inject(method = "getNewNoise", at = @At("HEAD"), require = 1)
+    private void dragonfixes$resetOceanSamples(ChunkManagerRealistic manager, int x, int z,
+            RealisticBiomeBase[] biomes, CallbackInfoReturnable<float[]> cir) {
+        if (biomes != dragonfixes$previewBiomes) dragonfixes$oceanCursor = 0;
+    }
+
+    // RWG already computes these values in X-major order. Preserve the exact
+    // float returned by its own manager instead of running the noise again.
+    @ModifyExpressionValue(method = "getNewNoise",
+            at = @At(value = "INVOKE", target = "Lrwg/world/ChunkManagerRealistic;getOceanValue(II)F"), require = 1)
+    private float dragonfixes$rememberOceanValue(float original) {
+        int index = dragonfixes$oceanCursor;
+        if (index >= 0 && index < dragonfixes$oceanValues.length) {
+            dragonfixes$oceanValues[index] = original;
+            dragonfixes$oceanCursor = index + 1;
+        } else {
+            dragonfixes$oceanCursor = -1;
+        }
+        return original;
+    }
+
     // The native Chroma cliff shaper consults the manager, not RWG1's blended selection.
     // Keep the biome IDs consistent with that shaper without altering blended heights.
     @Inject(method = "getNewNoise", at = @At("RETURN"), require = 1)
@@ -115,19 +142,21 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
             RealisticBiomeBase[] biomes, CallbackInfoReturnable<float[]> cir) {
         if (biomes == dragonfixes$previewBiomes
                 || Rwg1ChromaBiomes.cliffs == null || Rwg1ChromaBiomes.shores == null) return;
+        boolean complete = dragonfixes$oceanCursor == dragonfixes$oceanValues.length;
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 int index = localZ * 16 + localX;
-                biomes[index] = dragonfixes$alignCliffColumn(manager, x + localX, z + localZ, biomes[index]);
+                RealisticBiomeBase predicted = complete
+                        ? manager.getBiomeDataAt(x + localX, z + localZ, dragonfixes$oceanValues[localX * 16 + localZ])
+                        : manager.getBiomeDataAt(x + localX, z + localZ);
+                biomes[index] = dragonfixes$alignCliffColumn(predicted, biomes[index]);
             }
         }
     }
 
     @Unique
-    private RealisticBiomeBase dragonfixes$alignCliffColumn(ChunkManagerRealistic manager, int x, int z,
+    private static RealisticBiomeBase dragonfixes$alignCliffColumn(RealisticBiomeBase predicted,
             RealisticBiomeBase blended) {
-        if (Rwg1ChromaBiomes.cliffs == null || Rwg1ChromaBiomes.shores == null) return blended;
-        RealisticBiomeBase predicted = manager.getBiomeDataAt(x, z);
         if (predicted != null && (Rwg1ChromaBiomes.isCliff(predicted) || Rwg1ChromaBiomes.isCliff(blended))) {
             return predicted;
         }
