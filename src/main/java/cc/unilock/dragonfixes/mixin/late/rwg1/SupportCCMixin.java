@@ -36,8 +36,11 @@ public abstract class SupportCCMixin {
         for (BiomeGenBase biome : biomes) {
             if (biome == null) continue;
             boolean cliff = biome == ChromatiCraft.glowingcliffs || biome == ChromatiCraft.glowingcliffsEdge;
-            RealisticBiomeSupport wrapper = new RealisticBiomeSupport(biome,
-                    cliff ? RWGBiomes.baseOceanTemperate : RWGBiomes.baseTemperateForest,
+            // The river field is the native fallback, not a separate climate entry.
+            // DragonAPI's river event still has the final say during chunk generation.
+            BiomeGenBase river = cliff ? biome : biome == ChromatiCraft.rainbowforest
+                    && ChromatiCraft.rainbowRiver != null ? ChromatiCraft.rainbowRiver : RWGBiomes.baseTemperateForest;
+            RealisticBiomeSupport wrapper = new RealisticBiomeSupport(biome, river,
                     cliff ? new TerrainHilly(100f, 120f, 0f) : new TerrainHighland(6f, 120f, 65f, 150f),
                     new SurfaceGrassland(biome.topBlock, biome.fillerBlock, Blocks.stone, Blocks.cobblestone));
             if (biome == ChromatiCraft.glowingcliffs) Rwg1ChromaBiomes.cliffs = wrapper;
@@ -49,8 +52,8 @@ public abstract class SupportCCMixin {
                     Support.addBiome(wrapper, category);
                 }
             }
-            DragonFixes.LOGGER.info("RWG1: registered {} (Minecraft ID {}, wrapper ID {})",
-                    biome.biomeName, biome.biomeID, wrapper.biomeID);
+            DragonFixes.LOGGER.info("RWG1: registered {} (Minecraft ID {}, wrapper ID {}, river fallback {})",
+                    biome.biomeName, biome.biomeID, wrapper.biomeID, river.biomeName);
         }
         ci.cancel();
     }

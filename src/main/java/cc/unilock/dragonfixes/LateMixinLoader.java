@@ -75,6 +75,7 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("rwg1.SupportCCMixin");
             mixins.add("rwg1.ChunkManagerRealisticMixin");
             mixins.add("rwg1.ChunkGeneratorRealisticMixin");
+            mixins.add("rwg1.RealisticBiomeSupportMixin");
             if (loadedMods.contains("naturescompass")) {
                 mixins.add("rwg1.BiomeSearchWorkerMixin");
             }
