@@ -6,12 +6,14 @@ import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import cc.unilock.dragonfixes.compat.Rwg1ChromaBiomes;
 import cc.unilock.dragonfixes.compat.Rwg1StreamPreview;
+import cc.unilock.dragonfixes.compat.Rwg1BiomeSelection;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import rwg.util.NoiseGenerator;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,11 +33,13 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     @Unique private boolean dragonfixes$loggedRiverEvent;
     @Unique private boolean dragonfixes$loggedDryCandidate;
     @Shadow @Final private NoiseGenerator perlin;
-    @Shadow @Final private float[] mapGenBiomes;
+    @Shadow @Final private float[][] smallRender;
     @Shadow @Final private float[] testHeight;
     @Shadow @Final private float[] riverStrength;
     @Shadow public abstract float[] getNewNoise(ChunkManagerRealistic manager, int x, int z,
             RealisticBiomeBase[] biomes);
+    @Unique private final RealisticBiomeBase[] dragonfixes$previewBiomes = new RealisticBiomeBase[256];
+    @Unique private int dragonfixes$previewIndex = -1;
 
     @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     private void dragonfixes$attachPreview(World world, long seed, CallbackInfo ci) {
@@ -58,23 +62,46 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     public BiomeGenBase dragonfixes$previewStream(int x, int z) {
         if (!dragonfixes$isRiverColumn(x, z, -cmr.getRiverStrength(x, z))) return null;
 
-        // Nature's Compass executes its worker on the server tick. getNewNoise uses
-        // reusable interpolation scratch buffers; its persistent output arrays must
-        // not be left with the preview chunk's heights or map-generation weights.
-        float[] oldWeights = mapGenBiomes.clone();
-        float[] oldHeights = testHeight.clone();
-        float[] oldRivers = riverStrength.clone();
-        RealisticBiomeBase[] predicted = new RealisticBiomeBase[256];
+        // The worker runs on the server tick, like the generator it borrows.
+        // Only interpolation scratch is touched; the three persistent output
+        // arrays are never written during a preview.
+        if (dragonfixes$previewIndex != -1) return null;
+        int index = (z & 15) * 16 + (x & 15);
+        dragonfixes$previewBiomes[index] = null;
+        RealisticBiomeBase biome;
+        dragonfixes$previewIndex = index;
         try {
-            getNewNoise(cmr, x & ~15, z & ~15, predicted);
-            RealisticBiomeBase biome = predicted[(z & 15) * 16 + (x & 15)];
-            if (biome == null || biome.baseBiome != ChromatiCraft.rainbowforest) return null;
-            return ChromaBiomeEvents.river(biome.baseBiome, biome.riverBiome);
+            getNewNoise(cmr, x & ~15, z & ~15, dragonfixes$previewBiomes);
+            biome = dragonfixes$previewBiomes[index];
         } finally {
-            System.arraycopy(oldWeights, 0, mapGenBiomes, 0, oldWeights.length);
-            System.arraycopy(oldHeights, 0, testHeight, 0, oldHeights.length);
-            System.arraycopy(oldRivers, 0, riverStrength, 0, oldRivers.length);
+            dragonfixes$previewIndex = -1;
         }
+        if (biome == null || biome.baseBiome != ChromatiCraft.rainbowforest) return null;
+        return ChromaBiomeEvents.river(biome.baseBiome, biome.riverBiome);
+    }
+
+    // The single `if (b != null)` after interpolation is the dominant-biome
+    // check, immediately before the column loop. No terrain output has been
+    // written yet, and ordinary generation pays only one cheap check per chunk.
+    @Inject(method = "getNewNoise", at = @At(value = "JUMP", opcode = Opcodes.IFNULL),
+            cancellable = true, require = 1, allow = 1)
+    private void dragonfixes$finishBiomeOnlyPreview(ChunkManagerRealistic manager, int x, int z,
+            RealisticBiomeBase[] biomes, CallbackInfoReturnable<float[]> cir,
+            @Local RealisticBiomeBase dominant) {
+        if (biomes != dragonfixes$previewBiomes || dragonfixes$previewIndex < 0) return;
+        int index = dragonfixes$previewIndex;
+        int localX = index & 15;
+        int localZ = index >> 4;
+        RealisticBiomeBase selected = dominant; // RWG's >0.95 dominant-biome selection, if any.
+        if (selected == null) {
+            int id = Rwg1BiomeSelection.select(
+                    smallRender[(localX + 4) * 25 + (localZ + 4)],
+                    perlin.noise2((float) (x + localX) / 15f, (float) (z + localZ) / 15f));
+            if (id >= 0) selected = RealisticBiomeBase.getBiome(id);
+        }
+        biomes[index] = dragonfixes$alignCliffColumn(manager, x + localX, z + localZ, selected);
+        // The caller only consumes the selected biome, never this height array.
+        cir.setReturnValue(testHeight);
     }
 
     @Unique private boolean dragonfixes$loggedCliffs;
@@ -86,16 +113,25 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     @Inject(method = "getNewNoise", at = @At("RETURN"), require = 1)
     private void dragonfixes$alignCliffBiomes(ChunkManagerRealistic manager, int x, int z,
             RealisticBiomeBase[] biomes, CallbackInfoReturnable<float[]> cir) {
-        if (Rwg1ChromaBiomes.cliffs == null || Rwg1ChromaBiomes.shores == null) return;
+        if (biomes == dragonfixes$previewBiomes
+                || Rwg1ChromaBiomes.cliffs == null || Rwg1ChromaBiomes.shores == null) return;
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 int index = localZ * 16 + localX;
-                RealisticBiomeBase predicted = manager.getBiomeDataAt(x + localX, z + localZ);
-                if (Rwg1ChromaBiomes.isCliff(predicted) || Rwg1ChromaBiomes.isCliff(biomes[index])) {
-                    if (predicted != null) biomes[index] = predicted;
-                }
+                biomes[index] = dragonfixes$alignCliffColumn(manager, x + localX, z + localZ, biomes[index]);
             }
         }
+    }
+
+    @Unique
+    private RealisticBiomeBase dragonfixes$alignCliffColumn(ChunkManagerRealistic manager, int x, int z,
+            RealisticBiomeBase blended) {
+        if (Rwg1ChromaBiomes.cliffs == null || Rwg1ChromaBiomes.shores == null) return blended;
+        RealisticBiomeBase predicted = manager.getBiomeDataAt(x, z);
+        if (predicted != null && (Rwg1ChromaBiomes.isCliff(predicted) || Rwg1ChromaBiomes.isCliff(blended))) {
+            return predicted;
+        }
+        return blended;
     }
 
     @WrapOperation(method = "replaceBlocksForBiome",
