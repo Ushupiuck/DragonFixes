@@ -60,23 +60,23 @@ public class DragonFixesConfig {
     @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
     public static boolean fixChromaBiomeIntegration;
 
-    @Config.Comment("Overrides RWG1/RWG2's climate pools for ChromatiCraft biomes. Changing these settings can cause borders between old and new chunks. Disable to retain RWG1/RWG2's original placement.")
+    @Config.Comment("Overrides RWG1/RWG2's climate pools for ChromatiCraft biomes. Changing these settings can cause borders between old and new chunks. Disable to retain the original HOT climate category.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
-        public static boolean overrideChromaClimate;
+    public static boolean overrideChromaClimate;
 
     @Config.Comment("RWG1/RWG2 climate pools for Rainbow Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
     @Config.DefaultStringList({"COLD"})
     @Config.RequiresMcRestart
-        public static String[] rainbowForestClimate;
+    public static String[] rainbowForestClimate;
 
     @Config.Comment("RWG1/RWG2 climate pools for Ender Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
     @Config.DefaultStringList({"COLD"})
     @Config.RequiresMcRestart
-        public static String[] enderForestClimate;
+    public static String[] enderForestClimate;
 
-    @Config.Comment("RWG1/RWG2 climate pools for Luminous Cliffs. Shores follow their parent when fixChromaBiomeIntegration is enabled; otherwise both are independently registered in these pools. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
+    @Config.Comment("RWG1/RWG2 climate pools for Luminous Cliffs. Shores follow their parent when the corresponding RWG integration fix is enabled. In RWG1, the climate override also requires fixRwg1ChromaBiomeIntegration. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG1/RWG2's original placement.")
     @Config.DefaultStringList({"COLD"})
     @Config.RequiresMcRestart
-        public static String[] luminousCliffsClimate;
+    public static String[] luminousCliffsClimate;
 }
