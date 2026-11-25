@@ -21,8 +21,9 @@ public abstract class BiomeSearchWorkerMixin {
             require = 1)
     private BiomeGenBase dragonfixes$searchRwg1Stream(World world, int x, int z, Operation<BiomeGenBase> original) {
         BiomeGenBase raw = original.call(world, x, z);
-        if (ChromatiCraft.rainbowRiver == null || biome != ChromatiCraft.rainbowRiver
-                || raw != ChromatiCraft.rainbowforest || world.isRemote
+        // The raw biome can disagree with RWG1's blended parent at biome edges.
+        // The preview checks the river predicate before doing the blended lookup.
+        if (ChromatiCraft.rainbowRiver == null || biome != ChromatiCraft.rainbowRiver || world.isRemote
                 || world.getChunkProvider().chunkExists(x >> 4, z >> 4)
                 || !(world.getWorldChunkManager() instanceof ChunkManagerRealistic)) return raw;
         if (!(world.getWorldChunkManager() instanceof Rwg1StreamPreview.Access)) return raw;
