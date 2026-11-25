@@ -68,8 +68,14 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.TileEntityPlayerDelegateMixin");
             mixins.add("chromaticraft.TileEntityWirelessPoweredMixin");
         }
-        if (rwg2 && chromaticraft && DragonFixesConfig.overrideChromaClimate) {
-            mixins.add("rwg2.SupportCCMixin");
+        if (rwg2 && chromaticraft) {
+            if (DragonFixesConfig.overrideChromaClimate || DragonFixesConfig.fixChromaBiomeIntegration) {
+                mixins.add("rwg2.SupportCCMixin");
+            }
+            if (DragonFixesConfig.fixChromaBiomeIntegration) {
+                mixins.add("rwg2.ChunkManagerRealisticMixin");
+                mixins.add("rwg2.ChunkGeneratorRealisticMixin");
+            }
         }
         if (dragonapi) {
             mixins.add("dragonapi.AbstractSearchFoundPathMixin");

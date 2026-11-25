@@ -6,6 +6,7 @@ import java.util.Locale;
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
 import cc.unilock.dragonfixes.DragonFixesConfig;
+import cc.unilock.dragonfixes.compat.RwgChromaBiomes;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,6 +26,20 @@ public class SupportCCMixin {
     private static void dragonfixes$overrideChromaClimate(RealisticBiomeBase biome, BiomeCategory originalCategory,
             Operation<Void> original) {
         BiomeGenBase base = biome.baseBiome;
+        if (DragonFixesConfig.fixChromaBiomeIntegration) {
+            if (base == ChromatiCraft.glowingcliffs) {
+                RwgChromaBiomes.cliffs = biome;
+            } else if (base == ChromatiCraft.glowingcliffsEdge) {
+                // Keep the existing realistic wrapper, but do not put it in any independent climate pool.
+                RwgChromaBiomes.shores = biome;
+                DragonFixes.LOGGER.info("RWG2: {} derives from Luminous Cliffs coastlines", base.biomeName);
+                return;
+            }
+        }
+        if (!DragonFixesConfig.overrideChromaClimate) {
+            original.call(biome, originalCategory);
+            return;
+        }
         String[] configured;
         if (base == ChromatiCraft.rainbowforest) {
             configured = DragonFixesConfig.rainbowForestClimate;
