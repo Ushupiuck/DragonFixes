@@ -61,9 +61,9 @@ public abstract class BiomeAnalyzerMixin {
             int id = genLayerBiomes[xyinverted[i]];
             RealisticBiomeBase original = RealisticBiomeBase.getBiome(id);
             RealisticBiomeBase repaired = jitteredBiomes[i];
-            if (original == null || repaired == null || original == repaired) continue;
+            if (original == null || repaired == null) continue;
 
-            if (dragonfixes$isCliff(original.baseBiome) || dragonfixes$isCliff(repaired.baseBiome)) {
+            if (original != repaired && (dragonfixes$isCliff(original.baseBiome) || dragonfixes$isCliff(repaired.baseBiome))) {
                 jitteredBiomes[i] = original;
             }
 
