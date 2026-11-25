@@ -35,4 +35,27 @@ public class DragonFixesConfig {
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
     public static boolean replaceRubberWithGemLatex;
+    @Config.Comment("Overrides RWG2's climate pools for ChromatiCraft biomes. Changing these settings can cause borders between old and new chunks. Disable to retain RWG2's original placement.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static boolean overrideChromaClimate;
+
+    @Config.Comment("RWG2 climate pools for Rainbow Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG2's original placement.")
+    @Config.DefaultStringList({"COLD"})
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static String[] rainbowForestClimate;
+
+    @Config.Comment("RWG2 climate pools for Ender Forest. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG2's original placement.")
+    @Config.DefaultStringList({"COLD"})
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static String[] enderForestClimate;
+
+    @Config.Comment("RWG2 climate pools for Luminous Cliffs and Luminous Cliffs Shores. Valid values: SNOW, COLD (includes temperate), HOT, WET. Multiple values are allowed. Empty or invalid lists retain RWG2's original placement.")
+    @Config.DefaultStringList({"COLD"})
+    @Config.RequiresMcRestart
+    @Config.RequiresMod(value = {"rwg2", "ChromatiCraft"}, mode = Config.RequiresMod.Mode.AND)
+    public static String[] luminousCliffsClimate;
 }

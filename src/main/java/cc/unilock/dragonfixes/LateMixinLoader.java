@@ -20,6 +20,7 @@ public class LateMixinLoader implements ILateMixinLoader {
         final boolean cavecontrol = loadedMods.contains("CaveControl");
         final boolean chromaticraft = loadedMods.contains("ChromatiCraft");
         final boolean dragonapi = loadedMods.contains("DragonAPI");
+        final boolean rwg2 = loadedMods.contains("rwg2");
         final boolean reactorcraft = loadedMods.contains("ReactorCraft");
         final boolean rotarycraft = loadedMods.contains("RotaryCraft");
         final boolean satisforestry = loadedMods.contains("Satisforestry");
@@ -66,6 +67,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.TileEntityLumenAlvearyTemperatureMatchingEffectMixin");
             mixins.add("chromaticraft.TileEntityPlayerDelegateMixin");
             mixins.add("chromaticraft.TileEntityWirelessPoweredMixin");
+        }
+        if (rwg2 && chromaticraft && DragonFixesConfig.overrideChromaClimate) {
+            mixins.add("rwg2.SupportCCMixin");
         }
         if (dragonapi) {
             mixins.add("dragonapi.AbstractSearchFoundPathMixin");
