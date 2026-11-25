@@ -13,6 +13,15 @@ repositories {
         content { includeModule("github.release", "RTG") }
     }
     ivy {
+        name = "NaturesCompassReleaseArtifacts"
+        url = uri("https://github.com/GTNewHorizons/NaturesCompass/releases/download")
+        patternLayout {
+            artifact("[revision]/[artifact]-[revision](-[classifier]).[ext]")
+        }
+        metadataSources { artifact() }
+        content { includeModule("github.release", "naturescompass") }
+    }
+    ivy {
         name = "ClimateControlReleaseArtifacts"
         url = uri("https://github.com/GTNewHorizons/Climate-Control/releases/download")
         patternLayout {

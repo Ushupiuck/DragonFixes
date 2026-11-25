@@ -84,6 +84,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("rtg.BiomeAnalyzerMixin");
             mixins.add("rtg.RealisticBiomePresenceTesterMixin");
             mixins.add("rtg.WorldChunkManagerRTGMixin");
+            mixins.add("rtg.ChunkProviderRTGMixin");
+            if (loadedMods.contains("naturescompass")) {
+                mixins.add("rtg.BiomeSearchWorkerMixin");
+            }
         }
         if (climateControl && chromaticraft && DragonFixesConfig.fixClimateControlChromaBiomeIntegration) {
             mixins.add("climatecontrol.BiomeSettingsMixin");
