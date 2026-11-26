@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cc.unilock.dragonfixes.compat.StoredBiomeLookup;
+import cpw.mods.fml.common.Loader;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -22,6 +23,7 @@ public abstract class AnvilChunkLoaderBiomeMixin implements StoredBiomeLookup.Ac
     @Shadow private List<?> chunksToRemove;
     @Shadow private Set<?> pendingAnvilChunksCoordinates;
     @Shadow private Object syncLockObject;
+    @Unique private final boolean dragonfixes$observe = Loader.isModLoaded("naturescompass");
     @Unique private final Map<ChunkCoordIntPair, PendingChunkAccessor> dragonfixes$inFlight = new HashMap<>();
     @Unique private final ThreadLocal<PendingChunkAccessor> dragonfixes$writing = new ThreadLocal<>();
     @Unique private long dragonfixes$revision;
@@ -33,6 +35,7 @@ public abstract class AnvilChunkLoaderBiomeMixin implements StoredBiomeLookup.Ac
             at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;", remap = false),
             require = 1)
     private void dragonfixes$captureWriting(CallbackInfoReturnable<Boolean> cir) {
+        if (!dragonfixes$observe) return;
         PendingChunkAccessor entry = (PendingChunkAccessor) chunksToRemove.get(0);
         dragonfixes$inFlight.put(entry.dragonfixes$getCoordinate(), entry);
         dragonfixes$writing.set(entry);
@@ -41,6 +44,7 @@ public abstract class AnvilChunkLoaderBiomeMixin implements StoredBiomeLookup.Ac
 
     @WrapMethod(method = "writeNextIO")
     private boolean dragonfixes$clearWriting(Operation<Boolean> original) {
+        if (!dragonfixes$observe) return original.call();
         try {
             return original.call();
         } finally {

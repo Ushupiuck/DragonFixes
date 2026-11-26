@@ -15,7 +15,7 @@ import net.minecraft.world.gen.ChunkProviderServer;
 /** Read only biome metadata, never load or generate a chunk. */
 public final class StoredBiomeLookup {
     public static final int ABSENT = -1;
-    public static final int UNKNOWN = -2;
+    public static final int UNKNOWN = StoredBiomeIds.UNKNOWN;
     public static final int PENDING = 1 << 16;
     private StoredBiomeLookup() {}
 
@@ -74,26 +74,15 @@ public final class StoredBiomeLookup {
         if (root == null || !root.hasKey("Level", 10)) return UNKNOWN;
         NBTTagCompound level = root.getCompoundTag("Level");
         if (level.getInteger("xPos") != (x >> 4) || level.getInteger("zPos") != (z >> 4)) return UNKNOWN;
-        int index = ((z & 15) << 4) | (x & 15);
+        int index = StoredBiomeIds.index(x, z);
         if (level.hasKey("Biomes16v2", 7)) {
-            byte[] data = level.getByteArray("Biomes16v2");
-            if (data.length != 512) return UNKNOWN;
-            int offset = index << 1;
-            int value = (data[offset] & 255) | ((data[offset + 1] & 255) << 8);
-            return value == 65535 ? UNKNOWN : value;
+            return StoredBiomeIds.extended(level.getByteArray("Biomes16v2"), index);
         }
         if (level.hasKey("Biomes16", 7)) {
-            byte[] data = level.getByteArray("Biomes16");
-            // Legacy conversion differs across mods/versions. Only interpret
-            // the unambiguous low-byte case; otherwise let the normal lookup win.
-            if (data.length != 512 || data[index + 256] != 0) return UNKNOWN;
-            return data[index] & 255;
+            return StoredBiomeIds.legacy(level.getByteArray("Biomes16"), index);
         }
         if (level.hasKey("Biomes", 7)) {
-            byte[] data = level.getByteArray("Biomes");
-            if (data.length != 256) return UNKNOWN;
-            int value = data[index] & 255;
-            return value == 255 ? UNKNOWN : value;
+            return StoredBiomeIds.vanilla(level.getByteArray("Biomes"), index);
         }
         return UNKNOWN;
     }

@@ -89,6 +89,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/Rwg1BiomeSelection.java tests/Rwg1BiomeSelectionTest.java
           java -cp build/preview-tests Rwg1BiomeSelectionTest
 
+      - name: Check stored biome decoding
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/StoredBiomeIds.java tests/StoredBiomeIdsTest.java
+          java -cp build/preview-tests StoredBiomeIdsTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 
