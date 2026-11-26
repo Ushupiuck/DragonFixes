@@ -95,6 +95,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/StoredBiomeIds.java tests/StoredBiomeIdsTest.java
           java -cp build/preview-tests StoredBiomeIdsTest
 
+      - name: Check cliff search bounds and memoization
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CliffBiomeNeighborhood.java tests/CliffBiomeNeighborhoodTest.java
+          java -cp build/preview-tests CliffBiomeNeighborhoodTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 

@@ -58,6 +58,10 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("chromaticraft.accessor.RayTracerAccessor");
             }
             mixins.add("chromaticraft.BiomeGlowingCliffsMixin");
+            if (DragonFixesConfig.optimizeCliffBiomeQueries) {
+                mixins.add("chromaticraft.CliffTerrainQueryScopeMixin");
+                mixins.add("chromaticraft.GlowingCliffsColumnShaperMixin");
+            }
             mixins.add("chromaticraft.BlockChromaTileMixin");
             mixins.add("chromaticraft.BlockDecoFlowerMixin");
             mixins.add("chromaticraft.BlockTieredPlantMixin");

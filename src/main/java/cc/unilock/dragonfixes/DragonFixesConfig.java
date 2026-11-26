@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Caches Luminous Cliffs biome queries during a single terrain-shaping pass and skips adjacency searches when the entire nearby area contains no cliffs. Retains the original terrain shaping and search order when cliffs may be present.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    public static boolean optimizeCliffBiomeQueries;
+
     @Config.Comment("Opt-in wall-clock stack sampling of the integrated/dedicated server during startup. Reports every five seconds and on startup completion. No per-chunk hooks or timings when disabled.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
