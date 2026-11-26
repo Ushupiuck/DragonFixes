@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Experimental stored-biome lookup and pending-save tracking for Nature's Compass. Temporarily disabled by default to isolate a reported world-load performance regression. When disabled, the original live-biome and generator-preview behavior remains; saved unloaded chunks may be misidentified.")
+    @Config.DefaultBoolean(false)
+    @Config.RequiresMcRestart
+    public static boolean enableCompassStoredBiomeLookup;
+
     @Config.Comment("Enables troubleshooting logs and biome generation diagnostics for RWG1, RWG2, RTG and Climate Control. Does not change biome placement or compatibility fixes.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart

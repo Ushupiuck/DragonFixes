@@ -78,8 +78,9 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
         // Ordinary mod jars may not be visible during early coremod discovery.
         // Install the observers before vanilla storage classes load; the hooks
         // themselves remain inactive when Nature's Compass is absent.
-        if (DragonFixesConfig.fixRwg1ChromaBiomeIntegration || DragonFixesConfig.fixChromaBiomeIntegration
-                || DragonFixesConfig.fixRtgChromaBiomeIntegration || DragonFixesConfig.fixClimateControlChromaBiomeIntegration) {
+        if (DragonFixesConfig.enableCompassStoredBiomeLookup
+                && (DragonFixesConfig.fixRwg1ChromaBiomeIntegration || DragonFixesConfig.fixChromaBiomeIntegration
+                || DragonFixesConfig.fixRtgChromaBiomeIntegration || DragonFixesConfig.fixClimateControlChromaBiomeIntegration)) {
             mixins.add("world.AnvilChunkLoaderBiomeMixin");
             mixins.add("world.PendingChunkAccessor");
         }
