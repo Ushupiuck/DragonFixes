@@ -1,114 +1,117 @@
 import cc.unilock.dragonfixes.compat.WorldgenChangeBuffer;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorldgenChangeBufferTest {
-    private static void check(boolean result, String message) {
-        if (!result) throw new AssertionError(message);
+    private static void check(boolean ok, String reason) {
+        if (!ok) throw new AssertionError(reason);
     }
 
     public static void main(String[] args) throws Exception {
-        WorldgenChangeBuffer<Object, Integer, Integer> buffer = new WorldgenChangeBuffer<>();
-        Object a = new Object(), b = new Object();
-        check(buffer.recording(a) == null, "idle recording");
-        buffer.begin(a);
-        buffer.begin(a);
-        buffer.recording(a).put(1, 10);
-        buffer.recording(a).put(1, 11);
-        check(buffer.recording(b) == null, "cross-world recording");
-        buffer.begin(b);
-        buffer.recording(b).put(1, 20);
-        buffer.finish(b, map -> check(map.get(1) == 20, "world B data"));
+        WorldgenChangeBuffer<Integer, Integer> a = new WorldgenChangeBuffer<>();
+        WorldgenChangeBuffer<Integer, Integer> b = new WorldgenChangeBuffer<>();
+        a.put(0, 0);
+        check(!a.isRecording(), "idle buffer");
+        a.begin();
+        a.begin();
+        a.put(1, 10);
+        a.put(1, 11);
+        b.begin();
+        b.put(1, 20);
+        b.finish(map -> check(map.get(1) == 20, "world B"));
         List<Map<Integer, Integer>> retained = new ArrayList<>();
-        buffer.finish(a, map -> {
-            check(map.get(1) == 11, "last write wins");
-            check(buffer.recording(a) == null, "watcher recursion guard");
-            buffer.begin(a);
-            buffer.finish(a, ignored -> { throw new AssertionError("nested redispatch"); });
-            check(buffer.recording(a) == null, "outer guard remains");
+        a.finish(map -> {
+            check(map.size() == 1 && map.get(1) == 11, "world A and last write");
+            check(!a.isRecording(), "callback guard");
+            a.put(2, 2);
+            a.begin();
+            a.finish(m -> { throw new AssertionError("nested redispatch"); });
+            check(!a.isRecording(), "nested guard");
             retained.add(map);
             try {
-                map.put(2, 2);
+                map.put(3, 3);
                 throw new AssertionError("mutable snapshot");
             } catch (UnsupportedOperationException expected) {}
         });
-        check(buffer.recording(a) != null, "remaining generation depth");
-        buffer.recording(a).put(1, 99);
-        buffer.finish(a, map -> check(map.get(1) == 99, "subsequent population"));
-        check(retained.get(0).get(1) == 11, "retained snapshot changed");
-        check(buffer.recording(a) == null, "depth after finish");
+        check(a.isRecording(), "remaining depth");
+        a.put(1, 99);
+        a.finish(map -> check(map.size() == 1 && map.get(1) == 99, "next batch"));
+        check(retained.get(0).get(1) == 11 && !a.isRecording(), "retained snapshot");
 
-        // Fresh world: identical copy iteration order across differently sized batches.
-        Object orderWorld = new Object();
+        WorldgenChangeBuffer<Integer, Integer> order = new WorldgenChangeBuffer<>();
         HashMap<Integer, Integer> original = new HashMap<>();
         Random random = new Random(42);
         for (int count : new int[] {1, 1000, 2, 300, 1, 40}) {
-            buffer.begin(orderWorld);
+            order.begin();
             for (int i = 0; i < count; i++) {
                 int key = random.nextInt(10000);
                 original.put(key, i);
-                buffer.recording(orderWorld).put(key, i);
+                order.put(key, i);
             }
             Map<Integer, Integer> expected = new HashMap<>(original);
-            buffer.finish(orderWorld, map -> {
+            order.finish(map -> {
                 check(map.equals(expected), "snapshot contents");
-                check(new ArrayList<>(map.keySet()).equals(new ArrayList<>(expected.keySet())), "snapshot iteration order");
+                check(new ArrayList<>(map.keySet()).equals(new ArrayList<>(expected.keySet())),
+                        "snapshot ordering");
             });
             original.clear();
         }
 
-        // Two threads with the same world and overlapping coordinates.
         ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
-            CyclicBarrier barrier = new CyclicBarrier(2);
-            AtomicInteger callbacks = new AtomicInteger();
-            List<Future<?>> results = new ArrayList<>();
-            for (int id = 0; id < 2; id++) {
-                final int value = id;
-                results.add(executor.submit(() -> {
-                    for (int pass = 0; pass < 50; pass++) {
-                        buffer.begin(a);
-                        for (int i = 0; i < 500; i++) buffer.recording(a).put(i, value);
-                        barrier.await(10, TimeUnit.SECONDS);
-                        buffer.finish(a, map -> {
-                            check(map.size() == 500, "concurrent snapshot size");
-                            for (int v : map.values()) check(v == value, "thread contamination");
-                            callbacks.incrementAndGet();
-                        });
-                    }
-                    return null;
-                }));
-            }
-            for (Future<?> result : results) result.get(30, TimeUnit.SECONDS);
-            check(callbacks.get() == 100, "callback count");
+            // A begin/record on one thread must be visible to another.
+            executor.submit(() -> { a.begin(); a.put(7, 8); }).get(10, TimeUnit.SECONDS);
+            check(a.isRecording(), "cross-thread begin");
+            a.finish(map -> check(map.get(7) == 8, "cross-thread handoff"));
 
-            CountDownLatch ready = new CountDownLatch(1), reset = new CountDownLatch(1);
-            Future<?> worker = executor.submit(() -> {
-                buffer.begin(a);
-                buffer.recording(a).put(1, 5);
-                ready.countDown();
-                check(reset.await(10, TimeUnit.SECONDS), "reset timeout");
-                check(buffer.recording(a) == null, "logout did not invalidate worker");
+            // Keep a pending generation while another thread repeatedly drains.
+            // Every unique key must be delivered exactly once, including writes
+            // that occur while an earlier watcher is running.
+            a.begin();
+            CountDownLatch start = new CountDownLatch(1);
+            Future<?> writer = executor.submit(() -> {
+                start.await();
+                for (int i = 0; i < 20000; i++) a.put(i, i);
                 return null;
             });
-            check(ready.await(10, TimeUnit.SECONDS), "worker timeout");
-            buffer.reset();
-            reset.countDown();
-            worker.get(10, TimeUnit.SECONDS);
+            Set<Integer> seen = new HashSet<>();
+            start.countDown();
+            do {
+                a.begin();
+                a.finish(map -> {
+                    for (int key : map.keySet()) check(seen.add(key), "duplicate delivery");
+                    Thread.yield();
+                });
+            } while (!writer.isDone());
+            writer.get(10, TimeUnit.SECONDS);
+            a.finish(map -> {
+                for (int key : map.keySet()) check(seen.add(key), "duplicate final delivery");
+            });
+            check(seen.size() == 20000 && !a.isRecording(), "lost concurrent writes");
+
+            a.begin();
+            a.begin();
+            a.put(1, 1);
+            a.finish(map -> {
+                try {
+                    // If finish holds a lock around callbacks, this deadlocks.
+                    executor.submit(() -> a.put(2, 2)).get(10, TimeUnit.SECONDS);
+                } catch (Exception e) { throw new AssertionError(e); }
+            });
+            a.finish(map -> check(map.size() == 1 && map.get(2) == 2, "write during callback"));
         } finally {
             executor.shutdownNow();
         }
 
-        buffer.begin(a);
-        buffer.recording(a).put(1, 1);
+        a.begin();
+        a.put(1, 1);
         try {
-            buffer.finish(a, map -> { throw new IllegalStateException("watcher"); });
+            a.finish(map -> { throw new IllegalStateException("watcher"); });
             throw new AssertionError("swallowed watcher failure");
         } catch (IllegalStateException expected) {}
-        buffer.begin(a);
-        buffer.recording(a).put(2, 2);
-        buffer.finish(a, map -> check(map.size() == 1 && map.containsKey(2), "exception cleanup"));
-        System.out.println("Worldgen change buffer tests passed");
+        a.begin();
+        a.put(2, 2);
+        a.finish(map -> check(map.size() == 1 && map.containsKey(2), "exception cleanup"));
+        System.out.println("World-owned population buffer tests passed");
     }
 }

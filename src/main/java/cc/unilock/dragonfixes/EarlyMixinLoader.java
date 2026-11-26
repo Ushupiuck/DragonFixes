@@ -76,6 +76,10 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
         }
         List<String> mixins = new ArrayList<>();
         mixins.add("world.WorldChunkManagerBiomeCacheAccessor");
+        if (Launch.classLoader.getResource(
+                "Reika/DragonAPI/Auxiliary/WorldGenInterceptionRegistry.class") != null) {
+            mixins.add("world.WorldPopulationStateMixin");
+        }
         mixins.add("world.MapGenCarvingScopeMixin");
         mixins.add("world.VanillaCarverBiomeMixin");
         // Ordinary mod jars may not be visible during early coremod discovery.
