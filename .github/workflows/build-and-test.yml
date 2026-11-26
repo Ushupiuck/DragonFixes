@@ -101,6 +101,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CliffBiomeNeighborhood.java tests/CliffBiomeNeighborhoodTest.java
           java -cp build/preview-tests CliffBiomeNeighborhoodTest
 
+      - name: Check RTG map-gen IDs and profiler attribution
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/RtgMapGenIds.java src/main/java/cc/unilock/dragonfixes/debug/StartupSubsystems.java tests/StartupOptimizationTest.java
+          java -cp build/preview-tests StartupOptimizationTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 

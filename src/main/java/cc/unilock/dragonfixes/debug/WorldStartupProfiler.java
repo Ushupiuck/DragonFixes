@@ -26,6 +26,10 @@ public final class WorldStartupProfiler implements Runnable {
     private final long started = System.nanoTime();
     private final Map<String, Integer> stacks = new HashMap<>();
     private final Map<String, Integer> inclusive = new HashMap<>();
+    private final Map<String, Integer> leafMethods = new HashMap<>();
+    private final Map<String, Integer> subsystems = new HashMap<>();
+    private final Map<String, Integer> windowSubsystems = new HashMap<>();
+    private int windowSamples;
     private final Map<Thread.State, Integer> states = new HashMap<>();
     private final ThreadMXBean mx = ManagementFactory.getThreadMXBean();
     private final long cpuAtStart;
@@ -43,9 +47,10 @@ public final class WorldStartupProfiler implements Runnable {
     public static synchronized void start(Thread target) {
         stop("new startup");
         active = new WorldStartupProfiler(target);
-        DragonFixes.LOGGER.info("[WorldStartupProfiler] start target={} storedLookup={} pylonCache={} pylonTracer={}",
+        DragonFixes.LOGGER.info("[WorldStartupProfiler] start target={} storedLookup={} pylonCache={} pylonTracer={} rtgMapGenCorrection={} cliffOptimization={}",
                 target.getName(), DragonFixesConfig.enableCompassStoredBiomeLookup,
-                DragonFixesConfig.useSynchronizedPylonCache, DragonFixesConfig.useThreadLocalPylonTracer);
+                DragonFixesConfig.useSynchronizedPylonCache, DragonFixesConfig.useThreadLocalPylonTracer,
+                DragonFixesConfig.optimizeRtgEndlessIdsMapGen, DragonFixesConfig.optimizeCliffBiomeQueries);
         active.sampler.start();
     }
 
@@ -92,6 +97,11 @@ public final class WorldStartupProfiler implements Runnable {
         StackTraceElement[] trace = target.getStackTrace();
         if (trace.length == 0) return;
         samples++;
+        windowSamples++;
+        leafMethods.merge(frame(trace[0]), 1, Integer::sum);
+        String subsystem = StartupSubsystems.classify(trace);
+        subsystems.merge(subsystem, 1, Integer::sum);
+        windowSubsystems.merge(subsystem, 1, Integer::sum);
         states.merge(target.getState(), 1, Integer::sum);
         StringBuilder key = new StringBuilder();
         for (int i = 0; i < Math.min(7, trace.length); i++) {
@@ -128,18 +138,23 @@ public final class WorldStartupProfiler implements Runnable {
         long cpuMs = cpu < 0 || cpuAtStart < 0 ? -1 : TimeUnit.NANOSECONDS.toMillis(cpu - cpuAtStart);
         DragonFixes.LOGGER.info("[WorldStartupProfiler] {} elapsed={}ms cpu={}ms samples={} states={}",
                 phase, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started), cpuMs, samples, states);
-        logTop("stack", stacks, 8);
-        logTop("inclusive", inclusive, 12);
+        logTop("subsystem", subsystems, 20, samples);
+        logTop("window subsystem", windowSubsystems, 12, windowSamples);
+        windowSubsystems.clear();
+        windowSamples = 0;
+        logTop("leaf", leafMethods, 12, samples);
+        logTop("stack", stacks, 8, samples);
+        logTop("inclusive", inclusive, 20, samples);
     }
 
-    private void logTop(String label, Map<String, Integer> counts, int limit) {
+    private void logTop(String label, Map<String, Integer> counts, int limit, int denominator) {
         List<Map.Entry<String, Integer>> entries = new ArrayList<>(counts.entrySet());
         entries.sort(Comparator.<Map.Entry<String, Integer>>comparingInt(Map.Entry::getValue).reversed()
                 .thenComparing(Map.Entry::getKey));
         for (int i = 0; i < Math.min(limit, entries.size()); i++) {
             Map.Entry<String, Integer> entry = entries.get(i);
             DragonFixes.LOGGER.info("[WorldStartupProfiler] {} {}/{} {}", label,
-                    entry.getValue(), samples, entry.getKey());
+                    entry.getValue(), denominator, entry.getKey());
         }
     }
 }

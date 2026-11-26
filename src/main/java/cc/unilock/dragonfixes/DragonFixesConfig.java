@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Experimental RTG/EndlessIDs map-generation correction: run map generation once per distinct biome in ascending ID order, as RTG originally did. May change volcano/structure terrain relative to chunks made by the old repeated loop. Test on new worlds.")
+    @Config.DefaultBoolean(false)
+    @Config.RequiresMcRestart
+    public static boolean optimizeRtgEndlessIdsMapGen;
+
     @Config.Comment("Caches Luminous Cliffs biome queries during a single terrain-shaping pass and skips adjacency searches when the entire nearby area contains no cliffs. Retains the original terrain shaping and search order when cliffs may be present.")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
