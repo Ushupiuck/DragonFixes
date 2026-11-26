@@ -35,6 +35,7 @@ Fixes:
   - Allows Cave Crystals and Potion Crystals to work with the Player Imitation Core, even if the player isn't in the immediate vicinity (unilock)
   - Prevents crashes caused by Adjacency Cores on neighbor state updates (thegamemaster1234, unilock)
 - DragonAPI
+  - Isolates world-generation block interception batches by generation thread and world, rejecting unrelated client writes, preserving registered exceptions and ordered immutable watcher snapshots, and guarding reentrant population dispatch. Galacticraft's existing exclusion is evaluated when recording begins rather than for every block change.
   - Prevents NullPointerExceptions caused by `AbstractSearch$FoundPath#getPath`, preventing ChromatiCraft's Bezier Crystals from causing an Internal Server Error (unilock)
 - RotaryCraft
   - With `replaceRubberWithGemLatex` enabled, the Drying Bed produces latex instead of rubber, which is apparently helpful when playing with HBM's NTM (unilock)

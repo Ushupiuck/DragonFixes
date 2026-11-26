@@ -119,6 +119,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CliffBiomeNeighborhood.java tests/CliffBiomeTileTest.java
           java -cp build/preview-tests CliffBiomeTileTest
 
+      - name: Check world-generation interception isolation
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/WorldgenChangeBuffer.java tests/WorldgenChangeBufferTest.java
+          java -cp build/preview-tests WorldgenChangeBufferTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 

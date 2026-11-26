@@ -129,6 +129,8 @@ public class LateMixinLoader implements ILateMixinLoader {
         }
         if (dragonapi) {
             mixins.add("dragonapi.AbstractSearchFoundPathMixin");
+            mixins.add("dragonapi.accessor.BlockSetDataInvoker");
+            mixins.add("dragonapi.WorldGenInterceptionRegistryMixin");
         }
         if (reactorcraft) {
             mixins.add("reactorcraft.BlockReactorTileMixin");
