@@ -113,6 +113,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CarverBiomeColumns.java tests/CarverBiomeColumnsTest.java
           java -cp build/preview-tests CarverBiomeColumnsTest
 
+      - name: Check tightened cliff scan and aligned biome tiles
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CliffBiomeNeighborhood.java tests/CliffBiomeTileTest.java
+          java -cp build/preview-tests CliffBiomeTileTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 

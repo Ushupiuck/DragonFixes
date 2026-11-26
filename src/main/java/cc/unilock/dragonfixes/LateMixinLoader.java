@@ -105,6 +105,10 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("rwg2.ChunkGeneratorRealisticMixin");
             }
         }
+        if (rtg && chromaticraft && DragonFixesConfig.optimizeCliffBiomeQueries
+                && DragonFixesConfig.optimizeCliffNeighborhoodScan) {
+            mixins.add("rtg.RtgBiomeCacheAccessor");
+        }
         if (rtg && DragonFixesConfig.optimizeCaveBiomeQueries) {
             mixins.add("rtg.RtgCarverBiomeMixin");
         }

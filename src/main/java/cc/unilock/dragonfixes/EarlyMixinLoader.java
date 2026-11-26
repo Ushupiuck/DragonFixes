@@ -75,6 +75,9 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             disableTickIntercept();
         }
         List<String> mixins = new ArrayList<>();
+        if (DragonFixesConfig.optimizeCliffBiomeQueries && DragonFixesConfig.optimizeCliffNeighborhoodScan) {
+            mixins.add("world.WorldChunkManagerBiomeCacheAccessor");
+        }
         if (DragonFixesConfig.optimizeCaveBiomeQueries) {
             mixins.add("world.MapGenCarvingScopeMixin");
             mixins.add("world.VanillaCarverBiomeMixin");

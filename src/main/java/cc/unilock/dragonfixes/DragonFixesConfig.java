@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Experimental second-stage cliff optimization: use the exact radial search bounds and reuse aligned biome-cache tiles for vanilla and RTG managers. Other managers retain scalar lookups. Requires optimizeCliffBiomeQueries; test on new worlds.")
+    @Config.DefaultBoolean(false)
+    @Config.RequiresMcRestart
+    public static boolean optimizeCliffNeighborhoodScan;
+
     @Config.Comment("Experimental cave/ravine optimization: memoize original biome lookups within one carving pass for vanilla and RTG generators. Does not change density, frequency, geometry or block rules. Requires stable biome results during carving; test on new worlds.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
