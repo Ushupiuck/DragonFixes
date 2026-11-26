@@ -4,6 +4,21 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Opt-in wall-clock stack sampling of the integrated/dedicated server during startup. Reports every five seconds and on startup completion. No per-chunk hooks or timings when disabled.")
+    @Config.DefaultBoolean(false)
+    @Config.RequiresMcRestart
+    public static boolean enableWorldStartupProfiler;
+
+    @Config.Comment("Use the newer PylonGenerator cache synchronization. Disable to select the previous DragonFixes crash workaround for regression testing.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    public static boolean useSynchronizedPylonCache;
+
+    @Config.Comment("Use thread-local PylonFinder ray tracers. Disable to select the previous DragonFixes crash workaround for regression testing.")
+    @Config.DefaultBoolean(true)
+    @Config.RequiresMcRestart
+    public static boolean useThreadLocalPylonTracer;
+
     @Config.Comment("Experimental stored-biome lookup and pending-save tracking for Nature's Compass. Temporarily disabled by default to isolate a reported world-load performance regression. When disabled, the original live-biome and generator-preview behavior remains; saved unloaded chunks may be misidentified.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart

@@ -54,7 +54,9 @@ public class LateMixinLoader implements ILateMixinLoader {
         if (chromaticraft) {
             mixins.add("chromaticraft.accessor.CrystalBlockAccessor");
             mixins.add("chromaticraft.accessor.TileEntityCrystalBroadcasterAccessor");
-            mixins.add("chromaticraft.accessor.RayTracerAccessor");
+            if (DragonFixesConfig.useThreadLocalPylonTracer) {
+                mixins.add("chromaticraft.accessor.RayTracerAccessor");
+            }
             mixins.add("chromaticraft.BiomeGlowingCliffsMixin");
             mixins.add("chromaticraft.BlockChromaTileMixin");
             mixins.add("chromaticraft.BlockDecoFlowerMixin");
@@ -64,8 +66,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.DungeonGeneratorMixin");
             mixins.add("chromaticraft.ItemBlockCrystalGlowMixin");
             mixins.add("chromaticraft.ProgressionManagerMixin");
-            mixins.add("chromaticraft.PylonFinderMixin");
-            mixins.add("chromaticraft.PylonGeneratorMixin");
+            mixins.add(DragonFixesConfig.useThreadLocalPylonTracer
+                    ? "chromaticraft.PylonFinderMixin" : "chromaticraft.PylonFinderLegacyMixin");
+            mixins.add(DragonFixesConfig.useSynchronizedPylonCache
+                    ? "chromaticraft.PylonGeneratorMixin" : "chromaticraft.PylonGeneratorLegacyMixin");
             mixins.add("chromaticraft.TileEntityCrystalBroadcasterMixin");
             mixins.add("chromaticraft.TileEntityLumenAlvearyHumidityMatchingEffectMixin");
             mixins.add("chromaticraft.TileEntityLumenAlvearyTemperatureMatchingEffectMixin");
