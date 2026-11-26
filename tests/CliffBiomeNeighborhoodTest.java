@@ -37,7 +37,7 @@ public final class CliffBiomeNeighborhoodTest {
                         calls[0]++;
                         return cache.remember(i, raw.get(x,z));
                     };
-                    boolean may = cache.mayContainCliff(cached, b -> b != null && b == 1);
+                    boolean may = cache.mayContainReachableCliff(cached, null, b -> b != null && b == 1);
                     for (int x = ox; x < ox + 16; x++) {
                         for (int z = oz; z < oz + 16; z++) {
                             check(cache.isChunkColumn(x,z));
@@ -55,10 +55,10 @@ public final class CliffBiomeNeighborhoodTest {
                         }
                     }
                     int before = calls[0];
-                    check(cache.mayContainCliff(cached,b -> b != null && b == 1) == may);
+                    check(cache.mayContainReachableCliff(cached, null,b -> b != null && b == 1) == may);
                     check(calls[0] == before && calls[0] <= 48*48);
                     check(!cache.isChunkColumn(ox-1,oz) && cache.index(ox-17,oz) == -1);
-                    if (mode < 2) check(!may && calls[0] == 48*48);
+                    if (mode < 2) check(!may && calls[0] == 42*42);
                 }
             }
         }

@@ -2,7 +2,6 @@ package cc.unilock.dragonfixes.mixin.late.chromaticraft;
 
 import Reika.ChromatiCraft.World.BiomeGlowingCliffs;
 import Reika.ChromatiCraft.World.GlowingCliffsColumnShaper;
-import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.CliffBiomeNeighborhood;
 import cc.unilock.dragonfixes.compat.CliffBiomeTiles;
 import cc.unilock.dragonfixes.compat.CliffTerrainQueryScope;
@@ -33,11 +32,8 @@ public abstract class GlowingCliffsColumnShaperMixin {
         CliffTerrainQueryScope scope = CliffTerrainQueryScope.current(world);
         if (scope != null && search > 0 && search <= CliffBiomeNeighborhood.MAX_SEARCH
                 && scope.neighborhood.isChunkColumn(x, z)) {
-            boolean mayContain = DragonFixesConfig.optimizeCliffNeighborhoodScan
-                    ? scope.neighborhood.mayContainReachableCliff((qx, qz) -> getBiome(world, qx, qz),
-                            (tx, tz) -> CliffBiomeTiles.getTile(world.getWorldChunkManager(), tx, tz), BiomeGlowingCliffs::isGlowingCliffs)
-                    : scope.neighborhood.mayContainCliff((qx, qz) -> getBiome(world, qx, qz),
-                            BiomeGlowingCliffs::isGlowingCliffs);
+            boolean mayContain = scope.neighborhood.mayContainReachableCliff((qx, qz) -> getBiome(world, qx, qz),
+                    (tx, tz) -> CliffBiomeTiles.getTile(world.getWorldChunkManager(), tx, tz), BiomeGlowingCliffs::isGlowingCliffs);
             if (!mayContain) return null;
         }
         // Do not change the original angular search, tie breaking, heights,

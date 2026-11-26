@@ -4,45 +4,15 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
-    @Config.Comment("Experimental second-stage cliff optimization: use the exact radial search bounds and reuse aligned biome-cache tiles for vanilla and RTG managers. Other managers retain scalar lookups. Requires optimizeCliffBiomeQueries; test on new worlds.")
-    @Config.DefaultBoolean(false)
-    @Config.RequiresMcRestart
-    public static boolean optimizeCliffNeighborhoodScan;
-
-    @Config.Comment("Experimental cave/ravine optimization: memoize original biome lookups within one carving pass for vanilla and RTG generators. Does not change density, frequency, geometry or block rules. Requires stable biome results during carving; test on new worlds.")
-    @Config.DefaultBoolean(false)
-    @Config.RequiresMcRestart
-    public static boolean optimizeCaveBiomeQueries;
-
     @Config.Comment("Experimental RTG/EndlessIDs map-generation correction: run map generation once per distinct biome in ascending ID order, as RTG originally did. May change volcano/structure terrain relative to chunks made by the old repeated loop. Test on new worlds.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
     public static boolean optimizeRtgEndlessIdsMapGen;
 
-    @Config.Comment("Caches Luminous Cliffs biome queries during a single terrain-shaping pass and skips adjacency searches when the entire nearby area contains no cliffs. Retains the original terrain shaping and search order when cliffs may be present.")
-    @Config.DefaultBoolean(true)
-    @Config.RequiresMcRestart
-    public static boolean optimizeCliffBiomeQueries;
-
     @Config.Comment("Opt-in wall-clock stack sampling of the integrated/dedicated server during startup. Reports every five seconds and on startup completion. No per-chunk hooks or timings when disabled.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart
     public static boolean enableWorldStartupProfiler;
-
-    @Config.Comment("Use the newer PylonGenerator cache synchronization. Disable to select the previous DragonFixes crash workaround for regression testing.")
-    @Config.DefaultBoolean(true)
-    @Config.RequiresMcRestart
-    public static boolean useSynchronizedPylonCache;
-
-    @Config.Comment("Use thread-local PylonFinder ray tracers. Disable to select the previous DragonFixes crash workaround for regression testing.")
-    @Config.DefaultBoolean(true)
-    @Config.RequiresMcRestart
-    public static boolean useThreadLocalPylonTracer;
-
-    @Config.Comment("Experimental stored-biome lookup and pending-save tracking for Nature's Compass. Temporarily disabled by default to isolate a reported world-load performance regression. When disabled, the original live-biome and generator-preview behavior remains; saved unloaded chunks may be misidentified.")
-    @Config.DefaultBoolean(false)
-    @Config.RequiresMcRestart
-    public static boolean enableCompassStoredBiomeLookup;
 
     @Config.Comment("Enables troubleshooting logs and biome generation diagnostics for RWG1, RWG2, RTG and Climate Control. Does not change biome placement or compatibility fixes.")
     @Config.DefaultBoolean(false)

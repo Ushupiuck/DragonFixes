@@ -9,7 +9,6 @@ public final class CliffBiomeNeighborhood<T> {
     private final int minX, minZ;
     private final Object[] values = new Object[SIDE * SIDE];
     private final boolean[] known = new boolean[values.length];
-    private Boolean anyCliff;
     private Boolean anyReachableCliff;
     private final boolean[] attemptedTiles = new boolean[9];
 
@@ -95,24 +94,4 @@ public final class CliffBiomeNeighborhood<T> {
         T get(int x, int z);
     }
 
-    /**
-     * A conservative broad phase: every coordinate the original radial search
-     * can touch lies inside this square. A positive answer does not determine
-     * the original search result; only a negative answer allows an early exit.
-     * Lookup is the same memoized biome query used by the original search.
-     */
-    public boolean mayContainCliff(Lookup<T> lookup, Predicate<T> cliff) {
-        if (anyCliff == null) {
-            for (int dz = 0; dz < SIDE; dz++) {
-                for (int dx = 0; dx < SIDE; dx++) {
-                    if (cliff.test(lookup.get(minX + dx, minZ + dz))) {
-                        anyCliff = true;
-                        return true;
-                    }
-                }
-            }
-            anyCliff = false;
-        }
-        return anyCliff;
-    }
 }

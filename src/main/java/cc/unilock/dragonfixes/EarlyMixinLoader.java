@@ -75,19 +75,14 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             disableTickIntercept();
         }
         List<String> mixins = new ArrayList<>();
-        if (DragonFixesConfig.optimizeCliffBiomeQueries && DragonFixesConfig.optimizeCliffNeighborhoodScan) {
-            mixins.add("world.WorldChunkManagerBiomeCacheAccessor");
-        }
-        if (DragonFixesConfig.optimizeCaveBiomeQueries) {
-            mixins.add("world.MapGenCarvingScopeMixin");
-            mixins.add("world.VanillaCarverBiomeMixin");
-        }
+        mixins.add("world.WorldChunkManagerBiomeCacheAccessor");
+        mixins.add("world.MapGenCarvingScopeMixin");
+        mixins.add("world.VanillaCarverBiomeMixin");
         // Ordinary mod jars may not be visible during early coremod discovery.
         // Install the observers before vanilla storage classes load; the hooks
         // themselves remain inactive when Nature's Compass is absent.
-        if (DragonFixesConfig.enableCompassStoredBiomeLookup
-                && (DragonFixesConfig.fixRwg1ChromaBiomeIntegration || DragonFixesConfig.fixChromaBiomeIntegration
-                || DragonFixesConfig.fixRtgChromaBiomeIntegration || DragonFixesConfig.fixClimateControlChromaBiomeIntegration)) {
+        if (DragonFixesConfig.fixRwg1ChromaBiomeIntegration || DragonFixesConfig.fixChromaBiomeIntegration
+                || DragonFixesConfig.fixRtgChromaBiomeIntegration || DragonFixesConfig.fixClimateControlChromaBiomeIntegration) {
             mixins.add("world.AnvilChunkLoaderBiomeMixin");
             mixins.add("world.PendingChunkAccessor");
         }

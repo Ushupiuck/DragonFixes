@@ -47,11 +47,8 @@ public final class WorldStartupProfiler implements Runnable {
     public static synchronized void start(Thread target) {
         stop("new startup");
         active = new WorldStartupProfiler(target);
-        DragonFixes.LOGGER.info("[WorldStartupProfiler] start target={} storedLookup={} pylonCache={} pylonTracer={} rtgMapGenCorrection={} cliffOptimization={} caveBiomeOptimization={} cliffNeighborhoodScan={}",
-                target.getName(), DragonFixesConfig.enableCompassStoredBiomeLookup,
-                DragonFixesConfig.useSynchronizedPylonCache, DragonFixesConfig.useThreadLocalPylonTracer,
-                DragonFixesConfig.optimizeRtgEndlessIdsMapGen, DragonFixesConfig.optimizeCliffBiomeQueries,
-                DragonFixesConfig.optimizeCaveBiomeQueries, DragonFixesConfig.optimizeCliffNeighborhoodScan);
+        DragonFixes.LOGGER.info("[WorldStartupProfiler] start target={} rtgMapGenCorrection={}",
+                target.getName(), DragonFixesConfig.optimizeRtgEndlessIdsMapGen);
         active.sampler.start();
     }
 

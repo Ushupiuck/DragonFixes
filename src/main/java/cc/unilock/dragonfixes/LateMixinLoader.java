@@ -54,14 +54,10 @@ public class LateMixinLoader implements ILateMixinLoader {
         if (chromaticraft) {
             mixins.add("chromaticraft.accessor.CrystalBlockAccessor");
             mixins.add("chromaticraft.accessor.TileEntityCrystalBroadcasterAccessor");
-            if (DragonFixesConfig.useThreadLocalPylonTracer) {
-                mixins.add("chromaticraft.accessor.RayTracerAccessor");
-            }
+            mixins.add("chromaticraft.accessor.RayTracerAccessor");
             mixins.add("chromaticraft.BiomeGlowingCliffsMixin");
-            if (DragonFixesConfig.optimizeCliffBiomeQueries) {
-                mixins.add("chromaticraft.CliffTerrainQueryScopeMixin");
-                mixins.add("chromaticraft.GlowingCliffsColumnShaperMixin");
-            }
+            mixins.add("chromaticraft.CliffTerrainQueryScopeMixin");
+            mixins.add("chromaticraft.GlowingCliffsColumnShaperMixin");
             mixins.add("chromaticraft.BlockChromaTileMixin");
             mixins.add("chromaticraft.BlockDecoFlowerMixin");
             mixins.add("chromaticraft.BlockTieredPlantMixin");
@@ -70,10 +66,8 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.DungeonGeneratorMixin");
             mixins.add("chromaticraft.ItemBlockCrystalGlowMixin");
             mixins.add("chromaticraft.ProgressionManagerMixin");
-            mixins.add(DragonFixesConfig.useThreadLocalPylonTracer
-                    ? "chromaticraft.PylonFinderMixin" : "chromaticraft.PylonFinderLegacyMixin");
-            mixins.add(DragonFixesConfig.useSynchronizedPylonCache
-                    ? "chromaticraft.PylonGeneratorMixin" : "chromaticraft.PylonGeneratorLegacyMixin");
+            mixins.add("chromaticraft.PylonFinderMixin");
+            mixins.add("chromaticraft.PylonGeneratorMixin");
             mixins.add("chromaticraft.TileEntityCrystalBroadcasterMixin");
             mixins.add("chromaticraft.TileEntityLumenAlvearyHumidityMatchingEffectMixin");
             mixins.add("chromaticraft.TileEntityLumenAlvearyTemperatureMatchingEffectMixin");
@@ -105,11 +99,10 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("rwg2.ChunkGeneratorRealisticMixin");
             }
         }
-        if (rtg && chromaticraft && DragonFixesConfig.optimizeCliffBiomeQueries
-                && DragonFixesConfig.optimizeCliffNeighborhoodScan) {
+        if (rtg && chromaticraft) {
             mixins.add("rtg.RtgBiomeCacheAccessor");
         }
-        if (rtg && DragonFixesConfig.optimizeCaveBiomeQueries) {
+        if (rtg) {
             mixins.add("rtg.RtgCarverBiomeMixin");
         }
         if (rtg && loadedMods.contains("endlessids") && DragonFixesConfig.optimizeRtgEndlessIdsMapGen) {

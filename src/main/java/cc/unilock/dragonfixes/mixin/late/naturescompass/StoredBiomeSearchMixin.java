@@ -1,7 +1,6 @@
 package cc.unilock.dragonfixes.mixin.late.naturescompass;
 
 import Reika.ChromatiCraft.ChromatiCraft;
-import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.StoredBiomeLookup;
 import cc.unilock.dragonfixes.compat.CompassBiomePrediction;
 import com.chaosthedude.naturescompass.util.BiomeSearchWorker;
@@ -41,13 +40,12 @@ public abstract class StoredBiomeSearchMixin {
 
     @WrapMethod(method = "hasWork")
     private boolean dragonfixes$keepTentativeWorker(Operation<Boolean> original) {
-        if (!DragonFixesConfig.enableCompassStoredBiomeLookup) return original.call();
         return !finished && (dragonfixes$tentative || original.call());
     }
 
     @WrapMethod(method = "doWork")
     private boolean dragonfixes$revalidate(Operation<Boolean> original) {
-        if (!DragonFixesConfig.enableCompassStoredBiomeLookup || !dragonfixes$enabled()) return original.call();
+        if (!dragonfixes$enabled()) return original.call();
         if (dragonfixes$tentative) {
             BiomeGenBase actual = null;
             int stored = StoredBiomeLookup.UNKNOWN;
@@ -96,17 +94,15 @@ public abstract class StoredBiomeSearchMixin {
             return original.call(sampleWorld, sampleX, sampleZ);
         }
 
-        if (DragonFixesConfig.enableCompassStoredBiomeLookup) {
-            int stored = StoredBiomeLookup.read(sampleWorld, sampleX, sampleZ);
-            if (StoredBiomeLookup.isKnown(stored)) {
-                BiomeGenBase actual = BiomeGenBase.getBiome(StoredBiomeLookup.id(stored));
-                if (actual != null) {
-                    dragonfixes$sampleTentative = StoredBiomeLookup.isPending(stored);
-                    return actual;
-                }
+        int stored = StoredBiomeLookup.read(sampleWorld, sampleX, sampleZ);
+        if (StoredBiomeLookup.isKnown(stored)) {
+            BiomeGenBase actual = BiomeGenBase.getBiome(StoredBiomeLookup.id(stored));
+            if (actual != null) {
+                dragonfixes$sampleTentative = StoredBiomeLookup.isPending(stored);
+                return actual;
             }
-            dragonfixes$sampleTentative = true;
         }
+        dragonfixes$sampleTentative = true;
         BiomeGenBase raw = original.call(sampleWorld, sampleX, sampleZ);
         Object worker = this;
         // Optional generator mixins implement separate interfaces. This avoids
@@ -124,7 +120,7 @@ public abstract class StoredBiomeSearchMixin {
             at = @At(value = "INVOKE", target = "Lcom/chaosthedude/naturescompass/util/BiomeSearchWorker;finish(Z)V"),
             require = 2)
     private void dragonfixes$deferMatch(BiomeSearchWorker worker, boolean found, Operation<Void> original) {
-        if (DragonFixesConfig.enableCompassStoredBiomeLookup && found && dragonfixes$sampleTentative) {
+        if (found && dragonfixes$sampleTentative) {
             dragonfixes$tentative = true;
             dragonfixes$retries = 0;
             return;
