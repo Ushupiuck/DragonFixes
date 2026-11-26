@@ -2,14 +2,12 @@ package cc.unilock.dragonfixes.mixin.late.rtg;
 
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.DragonFixes;
-import cc.unilock.dragonfixes.DragonFixesConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.world.biome.BiomeGenBase;
 import rtg.api.biome.BiomeConfig;
 import rtg.api.biome.chromaticraft.config.BiomeConfigCC;
 import rtg.world.biome.deco.DecoBaseBiomeDecorations;
@@ -57,12 +55,6 @@ public abstract class RealisticBiomeCCBaseMixin {
                 new TerrainVanillaRiver(), new SurfaceVanillaRiver(streamConfig));
         stream.addDeco(new DecoBaseBiomeDecorations());
 
-        if (DragonFixesConfig.enableBiomeGenerationDiagnostics) {
-            DragonFixes.LOGGER.info("RTG: registered ChromatiCraft biomes: Ender Forest {}, Rainbow Forest {}, Luminous Cliffs {}, Shores {}, Rainbow Stream {}",
-                    ChromatiCraft.enderforest.biomeID, ChromatiCraft.rainbowforest.biomeID,
-                    ChromatiCraft.glowingcliffs.biomeID, ChromatiCraft.glowingcliffsEdge.biomeID,
-                    ChromatiCraft.rainbowRiver.biomeID);
-        }
         ci.cancel();
     }
 

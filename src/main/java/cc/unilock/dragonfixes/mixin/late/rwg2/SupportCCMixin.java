@@ -1,7 +1,6 @@
 package cc.unilock.dragonfixes.mixin.late.rwg2;
 
 import Reika.ChromatiCraft.ChromatiCraft;
-import cc.unilock.dragonfixes.DragonFixes;
 import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.RwgChromaBiomes;
 import cc.unilock.dragonfixes.compat.RwgChromaClimate;
@@ -30,9 +29,6 @@ public class SupportCCMixin {
             } else if (base == ChromatiCraft.glowingcliffsEdge) {
                 // Keep the existing realistic wrapper, but do not put it in any independent climate pool.
                 RwgChromaBiomes.shores = biome;
-                if (DragonFixesConfig.enableBiomeGenerationDiagnostics) {
-                    DragonFixes.LOGGER.info("RWG2: {} derives from Luminous Cliffs coastlines", base.biomeName);
-                }
                 return;
             }
         }

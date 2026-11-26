@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import Reika.ChromatiCraft.ChromatiCraft;
-import cc.unilock.dragonfixes.DragonFixes;
-import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.Rwg1ChromaBiomes;
 import cc.unilock.dragonfixes.compat.RwgChromaClimate;
 import net.minecraft.init.Blocks;
@@ -52,10 +50,6 @@ public abstract class SupportCCMixin {
                 for (BiomeCategory category : RwgChromaClimate.categories(biome, BiomeCategory.HOT, "RWG1")) {
                     Support.addBiome(wrapper, category);
                 }
-            }
-            if (DragonFixesConfig.enableBiomeGenerationDiagnostics) {
-                DragonFixes.LOGGER.info("RWG1: registered {} (Minecraft ID {}, wrapper ID {}, river fallback {})",
-                        biome.biomeName, biome.biomeID, wrapper.biomeID, river.biomeName);
             }
         }
         ci.cancel();

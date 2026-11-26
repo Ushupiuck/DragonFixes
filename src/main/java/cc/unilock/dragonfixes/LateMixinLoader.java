@@ -121,10 +121,6 @@ public class LateMixinLoader implements ILateMixinLoader {
         }
         if (climateControl && chromaticraft && DragonFixesConfig.fixClimateControlChromaBiomeIntegration) {
             mixins.add("climatecontrol.BiomeSettingsMixin");
-            if (DragonFixesConfig.enableBiomeGenerationDiagnostics) {
-                mixins.add("climatecontrol.BiomeRandomizerMixin");
-                mixins.add("climatecontrol.GenLayerBiomeSelectionMixin");
-            }
             mixins.add("climatecontrol.GenLayerShoreMixin");
             mixins.add("climatecontrol.GenLayerLowlandRiverMixMixin");
         }

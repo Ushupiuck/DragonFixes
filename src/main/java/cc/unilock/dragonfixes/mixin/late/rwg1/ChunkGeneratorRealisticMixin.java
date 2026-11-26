@@ -1,8 +1,6 @@
 package cc.unilock.dragonfixes.mixin.late.rwg1;
 
 import Reika.ChromatiCraft.ChromatiCraft;
-import cc.unilock.dragonfixes.DragonFixes;
-import cc.unilock.dragonfixes.DragonFixesConfig;
 import cc.unilock.dragonfixes.compat.ChromaBiomeEvents;
 import cc.unilock.dragonfixes.compat.Rwg1ChromaBiomes;
 import cc.unilock.dragonfixes.compat.Rwg1StreamPreview;
@@ -30,13 +28,9 @@ import rwg.world.ChunkManagerRealistic;
 @Mixin(value = ChunkGeneratorRealistic.class, remap = false)
 public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview {
     @Shadow @Final private ChunkManagerRealistic cmr;
-    @Unique private boolean dragonfixes$loggedRainbowForest;
-    @Unique private boolean dragonfixes$loggedRiverEvent;
-    @Unique private boolean dragonfixes$loggedDryCandidate;
     @Shadow @Final private NoiseGenerator perlin;
     @Shadow @Final private float[][] smallRender;
     @Shadow @Final private float[] testHeight;
-    @Shadow @Final private float[] riverStrength;
     @Shadow public abstract float[] getNewNoise(ChunkManagerRealistic manager, int x, int z,
             RealisticBiomeBase[] biomes);
     @Unique private final RealisticBiomeBase[] dragonfixes$previewBiomes = new RealisticBiomeBase[256];
@@ -48,10 +42,6 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
     private void dragonfixes$attachPreview(World world, long seed, CallbackInfo ci) {
         if (cmr instanceof Rwg1StreamPreview.Access) {
             ((Rwg1StreamPreview.Access) cmr).dragonfixes$setStreamPreview(this);
-        }
-        if (DragonFixesConfig.enableBiomeGenerationDiagnostics && !world.isRemote) {
-            DragonFixes.LOGGER.info("RWG1: active chunk generator in dimension {} (seed {})",
-                    world.provider.dimensionId, seed);
         }
     }
 
@@ -128,9 +118,6 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
         cir.setReturnValue(testHeight);
     }
 
-    @Unique private boolean dragonfixes$loggedCliffs;
-    @Unique private boolean dragonfixes$loggedShores;
-    @Unique private boolean dragonfixes$loggedStream;
 
     @Inject(method = "getNewNoise", at = @At("HEAD"), require = 1)
     private void dragonfixes$resetOceanSamples(ChunkManagerRealistic manager, int x, int z,
@@ -185,67 +172,6 @@ public abstract class ChunkGeneratorRealisticMixin implements Rwg1StreamPreview 
             at = @At(value = "FIELD", target = "Lrwg/biomes/realistic/RealisticBiomeBase;riverBiome:Lnet/minecraft/world/biome/BiomeGenBase;",
                     opcode = Opcodes.GETFIELD), require = 1)
     private BiomeGenBase dragonfixes$forwardRiverEvent(RealisticBiomeBase biome, Operation<BiomeGenBase> original) {
-        BiomeGenBase planned = original.call(biome);
-        BiomeGenBase resolved = ChromaBiomeEvents.river(biome.baseBiome, planned);
-        if (DragonFixesConfig.enableBiomeGenerationDiagnostics && !dragonfixes$loggedRiverEvent
-                && biome.baseBiome == ChromatiCraft.rainbowforest) {
-            dragonfixes$loggedRiverEvent = true;
-            DragonFixes.LOGGER.info("RWG1: first actual Rainbow Forest river event: planned={}, resolved={}",
-                    planned == null ? "null" : planned.biomeName, resolved == null ? "null" : resolved.biomeName);
-        }
-        return resolved;
-    }
-
-    @Inject(method = "replaceBlocksForBiome", at = @At("RETURN"), require = 1)
-    private void dragonfixes$reportFinalBiomes(int cx, int cz, net.minecraft.block.Block[] blocks, byte[] metadata,
-            RealisticBiomeBase[] biomes, BiomeGenBase[] base, float[] heights, CallbackInfo ci) {
-        if (!DragonFixesConfig.enableBiomeGenerationDiagnostics) return;
-        if (dragonfixes$loggedCliffs && dragonfixes$loggedShores && dragonfixes$loggedStream
-                && dragonfixes$loggedRainbowForest) return;
-        int forest = 0;
-        int candidates = 0;
-        int streams = 0;
-        int wetStreams = 0;
-        float strongest = 0f;
-        for (int i = 0; i < 256; i++) {
-            RealisticBiomeBase parent = biomes[i];
-            int lx = i & 15;
-            int lz = i >> 4;
-            float strength = -riverStrength[lx * 16 + lz];
-            if (parent != null && parent.baseBiome == ChromatiCraft.rainbowforest) {
-                forest++;
-                strongest = Math.max(strongest, strength);
-                if (dragonfixes$isRiverColumn(cx * 16 + lx, cz * 16 + lz, strength)) candidates++;
-            }
-            BiomeGenBase biome = base[i];
-            if (biome != null && biome == ChromatiCraft.rainbowRiver) {
-                streams++;
-                if (blocks[(lx * 16 + lz) * 256 + 62] == net.minecraft.init.Blocks.water) wetStreams++;
-            }
-            if (biome == null) continue;
-            if (!dragonfixes$loggedCliffs && biome == ChromatiCraft.glowingcliffs) {
-                dragonfixes$loggedCliffs = true;
-                DragonFixes.LOGGER.info("RWG1: generating Luminous Cliffs at chunk {}, {}", cx, cz);
-            }
-            if (!dragonfixes$loggedShores && biome == ChromatiCraft.glowingcliffsEdge) {
-                dragonfixes$loggedShores = true;
-                DragonFixes.LOGGER.info("RWG1: generating Luminous Cliffs Shores at chunk {}, {}", cx, cz);
-            }
-        }
-        if (forest > 0 && !dragonfixes$loggedRainbowForest) {
-            dragonfixes$loggedRainbowForest = true;
-            DragonFixes.LOGGER.info("RWG1: first generated Rainbow Forest parent at chunk {}, {} ({} columns, strongest river={}, candidates={})",
-                    cx, cz, forest, strongest, candidates);
-        }
-        if (streams > 0 && !dragonfixes$loggedStream) {
-            dragonfixes$loggedStream = true;
-            DragonFixes.LOGGER.info("RWG1: generating Rainbow Stream at chunk {}, {} ({} columns, {} water at y=62)",
-                    cx, cz, streams, wetStreams);
-        }
-        if (candidates > 0 && streams == 0 && !dragonfixes$loggedDryCandidate) {
-            dragonfixes$loggedDryCandidate = true;
-            DragonFixes.LOGGER.warn("RWG1: {} eligible Rainbow Forest river columns at chunk {}, {} but no Rainbow Stream in final array",
-                    candidates, cx, cz);
-        }
+        return ChromaBiomeEvents.river(biome.baseBiome, original.call(biome));
     }
 }
