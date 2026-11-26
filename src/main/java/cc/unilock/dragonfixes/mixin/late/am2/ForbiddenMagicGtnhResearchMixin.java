@@ -39,8 +39,9 @@ public abstract class ForbiddenMagicGtnhResearchMixin {
         dragonfixes$staffTextArgs = dragonfixes$removeOriginal("ROD_witchwood_staff", -3, -1);
     }
 
-    // Preserve GTNH's cost, central Ent Twig, Vinteum, Witchery distillates
-    // and opposed pedestal pairs. Only replace the three sapling pairs.
+    // Keep GTNH's aspect costs, instability and research gates, but restore
+    // Witchwood as the central item and AM2's original magical ingredients.
+    // Ent Twigs reinforce the rod; Salis Mundus replaces redundant Arcane Ash.
     @ModifyArgs(method = "loadRecipes()V", at = @At(value = "INVOKE",
             target = "Lcom/dreammaster/thaumcraft/TCHelper;addInfusionCraftingRecipe(Ljava/lang/String;"
                     + "Lnet/minecraft/item/ItemStack;ILthaumcraft/api/aspects/AspectList;"
@@ -51,36 +52,54 @@ public abstract class ForbiddenMagicGtnhResearchMixin {
             return;
         }
         Object[] ingredients = args.get(5);
+        Object center = args.get(4);
         Block wood = GameRegistry.findBlock("arsmagica2", "WitchwoodLog");
         Item essence = GameRegistry.findItem("arsmagica2", "essence");
+        Item ore = GameRegistry.findItem("arsmagica2", "itemOre");
+        Item salis = GameRegistry.findItem("Thaumcraft", "ItemResource");
+        Item witcheryIngredient = GameRegistry.findItem("witchery", "ingredient");
         Item sapling = GameRegistry.findItem("witchery", "witchsapling");
         if (wood == null || Item.getItemFromBlock(wood) == null || essence == null
-                || sapling == null || ingredients == null || ingredients.length != 12) {
+                || ore == null || salis == null || witcheryIngredient == null || sapling == null
+                || ingredients == null || ingredients.length != 12
+                || !dragonfixes$matches(center, witcheryIngredient, 82)) {
             DragonFixes.LOGGER.warn("Unable to resolve AM2 Witchwood infusion ingredients; retaining GTNH recipe");
             return;
         }
         for (int i = 0; i < 3; i++) {
             int slot = 1 + 2 * i;
-            if (!dragonfixes$isSapling(ingredients[slot], sapling, i)
-                    || !dragonfixes$isSapling(ingredients[slot + 6], sapling, i)) {
+            if (!dragonfixes$matches(ingredients[slot], sapling, i)
+                    || !dragonfixes$matches(ingredients[slot + 6], sapling, i)) {
                 DragonFixes.LOGGER.warn("GTNH Witchwood infusion layout changed; retaining its recipe");
                 return;
             }
         }
-        Object[] hybrid = ingredients.clone();
-        for (int offset = 0; offset < 12; offset += 6) {
-            hybrid[offset + 1] = new ItemStack(wood);
-            hybrid[offset + 3] = new ItemStack(essence, 1, 0); // Arcane Essence
-            hybrid[offset + 5] = new ItemStack(essence, 1, 5); // Nature Essence
-        }
+
+        ItemStack twig = (ItemStack) center;
+        // Identical pairs occupy opposite slots in the twelve-pedestal ring.
+        Object[] hybrid = {
+                twig.copy(),
+                new ItemStack(ore, 1, 3), // Purified Vinteum Dust
+                new ItemStack(essence, 1, 0), // Arcane Essence
+                new ItemStack(essence, 1, 1), // Earth Essence
+                new ItemStack(essence, 1, 2), // Air Essence
+                new ItemStack(ore, 1, 6), // Sunstone
+                twig.copy(),
+                new ItemStack(ore, 1, 3), // Purified Vinteum Dust
+                new ItemStack(salis, 1, 14), // Salis Mundus
+                new ItemStack(essence, 1, 3), // Fire Essence
+                new ItemStack(essence, 1, 4), // Water Essence
+                new ItemStack(ore, 1, 7) // Moonstone
+        };
+        args.set(4, new ItemStack(wood));
         args.set(5, hybrid);
         dragonfixes$hybridRecipe = true;
-        DragonFixes.LOGGER.info("Replaced GTNH Witchwood infusion saplings with AM2 logs and essences");
+        DragonFixes.LOGGER.info("Registered hybrid GTNH/AM2 Witchwood infusion");
     }
 
     @Unique
-    private static boolean dragonfixes$isSapling(Object ingredient, Item sapling, int meta) {
-        return ingredient instanceof ItemStack && ((ItemStack) ingredient).getItem() == sapling
+    private static boolean dragonfixes$matches(Object ingredient, Item item, int meta) {
+        return ingredient instanceof ItemStack && ((ItemStack) ingredient).getItem() == item
                 && ((ItemStack) ingredient).getItemDamage() == meta;
     }
 
