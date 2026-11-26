@@ -76,6 +76,12 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
         }
         List<String> mixins = new ArrayList<>();
         mixins.add("world.WorldChunkManagerBiomeCacheAccessor");
+        // AM2 is an ordinary mod, so it may not yet be discoverable here.
+        // Install vanilla hooks now; enable them only at loadComplete.
+        mixins.add("am2.EtheriumMovementMixin");
+        if (cpw.mods.fml.relauncher.FMLLaunchHandler.side().isClient()) {
+            mixins.add("am2.EtheriumBubbleMixin");
+        }
         if (Launch.classLoader.getResource(
                 "Reika/DragonAPI/Auxiliary/WorldGenInterceptionRegistry.class") != null) {
             mixins.add("world.WorldPopulationStateMixin");

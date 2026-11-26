@@ -45,6 +45,7 @@ public class DragonFixes {
     public void loadComplete(FMLLoadCompleteEvent event) {
         // All mods have finished init/postInit. It is now safe for AE2 to
         // enumerate other mods' creative-tab items on its CSV export thread.
+        cc.unilock.dragonfixes.compat.am2.EtheriumCompat.initialize();
         AE2CSVExportBridge.startDeferred();
     }
 }
