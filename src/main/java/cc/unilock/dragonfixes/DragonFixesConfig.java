@@ -4,6 +4,11 @@ import com.gtnewhorizon.gtnhlib.config.Config;
 
 @Config(modid = "dragonfixes")
 public class DragonFixesConfig {
+    @Config.Comment("Experimental cave/ravine optimization: memoize original biome lookups within one carving pass for vanilla and RTG generators. Does not change density, frequency, geometry or block rules. Requires stable biome results during carving; test on new worlds.")
+    @Config.DefaultBoolean(false)
+    @Config.RequiresMcRestart
+    public static boolean optimizeCaveBiomeQueries;
+
     @Config.Comment("Experimental RTG/EndlessIDs map-generation correction: run map generation once per distinct biome in ascending ID order, as RTG originally did. May change volcano/structure terrain relative to chunks made by the old repeated loop. Test on new worlds.")
     @Config.DefaultBoolean(false)
     @Config.RequiresMcRestart

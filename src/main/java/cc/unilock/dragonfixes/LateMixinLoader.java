@@ -105,6 +105,9 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("rwg2.ChunkGeneratorRealisticMixin");
             }
         }
+        if (rtg && DragonFixesConfig.optimizeCaveBiomeQueries) {
+            mixins.add("rtg.RtgCarverBiomeMixin");
+        }
         if (rtg && loadedMods.contains("endlessids") && DragonFixesConfig.optimizeRtgEndlessIdsMapGen) {
             mixins.add("rtg.EndlessIdsMapGenProviderMixin");
             mixins.add("rtg.EndlessIdsMapGenBiomeMixin");
