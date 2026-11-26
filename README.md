@@ -11,6 +11,8 @@ Most credit goes to [gamrguy](https://github.com/gamrguy) a.k.a. "RobotLucca" a.
 
 Fixes:
 - Disables the WAILA handlers for IFluidHandlers from Reika's mods, as WAILA provides its own handler for these (unilock)
+- Ars Magica 2 (optional, temporarily hosted here)
+  - Guards missing AM2 extended player properties in `ShrinkHandler#onEntityLiving`, preventing simulated-player crashes during GuideNH/BlockRenderer6343 scans without disabling shrinking for initialized players.
 - CaveControl
   - Prevents `CaveLoader#getEffectiveBiome` from ever returning a null biome, fixing crashes usually caused by pylon chunk loading (thegamemaster1234)
 - World-generation performance and compatibility

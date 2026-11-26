@@ -48,6 +48,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
 
+        if (loadedMods.contains("arsmagica2")) {
+            mixins.add("am2.ShrinkHandlerMixin");
+        }
         if (cavecontrol) {
             mixins.add("cavecontrol.CaveLoaderMixin");
         }
