@@ -72,6 +72,13 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.TileEntityPlayerDelegateMixin");
             mixins.add("chromaticraft.TileEntityWirelessPoweredMixin");
         }
+        if (chromaticraft && loadedMods.contains("naturescompass")
+                && ((rwg1 && DragonFixesConfig.fixRwg1ChromaBiomeIntegration)
+                || (rwg2 && DragonFixesConfig.fixChromaBiomeIntegration)
+                || (rtg && DragonFixesConfig.fixRtgChromaBiomeIntegration)
+                || (climateControl && DragonFixesConfig.fixClimateControlChromaBiomeIntegration))) {
+            mixins.add("naturescompass.StoredBiomeSearchMixin");
+        }
         if (rwg1 && chromaticraft && DragonFixesConfig.fixRwg1ChromaBiomeIntegration) {
             mixins.add("rwg1.SupportCCMixin");
             mixins.add("rwg1.ChunkManagerRealisticMixin");

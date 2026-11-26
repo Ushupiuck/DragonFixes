@@ -75,6 +75,10 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
             disableTickIntercept();
         }
         List<String> mixins = new ArrayList<>();
+        if (Launch.classLoader.getResource("com/chaosthedude/naturescompass/util/BiomeSearchWorker.class") != null) {
+            mixins.add("world.AnvilChunkLoaderBiomeMixin");
+            mixins.add("world.PendingChunkAccessor");
+        }
         if (Launch.classLoader.getResource("com/colen/tempora/mixins/MixinWorldServer.class") != null
                 && Launch.classLoader.getResource(
                         "Reika/DragonAPI/Instantiable/Event/BlockTickEvent.class") != null) {
