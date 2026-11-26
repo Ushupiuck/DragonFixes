@@ -1,36 +1,42 @@
 package cc.unilock.dragonfixes.mixin.early.world;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cc.unilock.dragonfixes.compat.StoredBiomeLookup;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AnvilChunkLoader.class)
 public abstract class AnvilChunkLoaderBiomeMixin implements StoredBiomeLookup.Access {
     @Shadow private List<?> chunksToRemove;
     @Shadow private Set<?> pendingAnvilChunksCoordinates;
     @Shadow private Object syncLockObject;
-    @Unique private PendingChunkAccessor dragonfixes$writing;
+    @Unique private final Map<ChunkCoordIntPair, PendingChunkAccessor> dragonfixes$inFlight = new HashMap<>();
+    @Unique private final ThreadLocal<PendingChunkAccessor> dragonfixes$writing = new ThreadLocal<>();
     @Unique private long dragonfixes$revision;
 
-    // Capture the removed entry while vanilla still holds its existing queue lock.
-    @WrapOperation(method = "writeNextIO",
+    // Observe the entry before the removal, under the existing queue lock.
+    // Hodgepodge's LoadDuringSave redirects the removal itself. Injecting
+    // before it (normal callback order, before redirects) lets both coexist.
+    @Inject(method = "writeNextIO",
             at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;", remap = false),
             require = 1)
-    private Object dragonfixes$captureWriting(List<?> queue, int index, Operation<Object> original) {
-        Object entry = original.call(queue, index);
-        dragonfixes$writing = (PendingChunkAccessor) entry;
+    private void dragonfixes$captureWriting(CallbackInfoReturnable<Boolean> cir) {
+        PendingChunkAccessor entry = (PendingChunkAccessor) chunksToRemove.get(0);
+        dragonfixes$inFlight.put(entry.dragonfixes$getCoordinate(), entry);
+        dragonfixes$writing.set(entry);
         dragonfixes$revision++;
-        return entry;
     }
 
     @WrapMethod(method = "writeNextIO")
@@ -38,9 +44,14 @@ public abstract class AnvilChunkLoaderBiomeMixin implements StoredBiomeLookup.Ac
         try {
             return original.call();
         } finally {
-            synchronized (syncLockObject) {
-                if (dragonfixes$writing != null) {
-                    dragonfixes$writing = null;
+            PendingChunkAccessor entry = dragonfixes$writing.get();
+            if (entry != null) {
+                dragonfixes$writing.remove();
+                synchronized (syncLockObject) {
+                    // Another thread can be writing a newer save of this chunk.
+                    if (dragonfixes$inFlight.get(entry.dragonfixes$getCoordinate()) == entry) {
+                        dragonfixes$inFlight.remove(entry.dragonfixes$getCoordinate());
+                    }
                     dragonfixes$revision++;
                 }
             }
@@ -69,8 +80,9 @@ public abstract class AnvilChunkLoaderBiomeMixin implements StoredBiomeLookup.Ac
                 }
                 return StoredBiomeLookup.UNKNOWN;
             }
-            if (dragonfixes$writing != null && coordinate.equals(dragonfixes$writing.dragonfixes$getCoordinate())) {
-                int result = StoredBiomeLookup.decode(dragonfixes$writing.dragonfixes$getNbt(), x, z);
+            PendingChunkAccessor writing = dragonfixes$inFlight.get(coordinate);
+            if (writing != null) {
+                int result = StoredBiomeLookup.decode(writing.dragonfixes$getNbt(), x, z);
                 return result < 0 ? StoredBiomeLookup.UNKNOWN : result | StoredBiomeLookup.PENDING;
             }
         }
