@@ -50,6 +50,10 @@ public class LateMixinLoader implements ILateMixinLoader {
 
         if (loadedMods.contains("arsmagica2")) {
             mixins.add("am2.ShrinkHandlerMixin");
+            if (loadedMods.contains("ForbiddenMagic") && loadedMods.contains("Thaumcraft")
+                    && loadedMods.contains("dreamcraft")) {
+                mixins.add("am2.ForbiddenMagicGtnhResearchMixin");
+            }
             if (FMLLaunchHandler.side().isClient()) {
                 mixins.add("am2.client.PotionHudMixin");
             }
