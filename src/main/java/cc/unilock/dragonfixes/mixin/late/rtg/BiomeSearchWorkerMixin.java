@@ -1,32 +1,25 @@
 package cc.unilock.dragonfixes.mixin.late.rtg;
 
 import Reika.ChromatiCraft.ChromatiCraft;
+import cc.unilock.dragonfixes.compat.CompassBiomePrediction;
 import cc.unilock.dragonfixes.compat.RtgLandscapeAccess;
 import com.chaosthedude.naturescompass.util.BiomeSearchWorker;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
 import rtg.world.WorldTypeRTG;
 import rtg.world.biome.WorldChunkManagerRTG;
 import rtg.world.gen.ChunkProviderRTG;
 
 @Mixin(value = BiomeSearchWorker.class, remap = false)
-public abstract class BiomeSearchWorkerMixin {
+public abstract class BiomeSearchWorkerMixin implements CompassBiomePrediction.Rtg {
     @Shadow public BiomeGenBase biome;
 
-    @WrapOperation(method = "doWork",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBiomeGenForCoordsBody(II)Lnet/minecraft/world/biome/BiomeGenBase;", remap = false),
-            require = 1)
-    private BiomeGenBase dragonfixes$searchFinalStreamBiome(World world, int x, int z,
-            Operation<BiomeGenBase> original) {
-        BiomeGenBase raw = original.call(world, x, z);
+    @Override
+    public BiomeGenBase dragonfixes$predictRtg(World world, int x, int z, BiomeGenBase raw) {
         if (ChromatiCraft.rainbowRiver == null || biome != ChromatiCraft.rainbowRiver
                 || raw != ChromatiCraft.rainbowforest || world.isRemote
-                || world.getChunkProvider().chunkExists(x >> 4, z >> 4)
                 || !(world.getWorldChunkManager() instanceof WorldChunkManagerRTG)) return raw;
 
         WorldChunkManagerRTG manager = (WorldChunkManagerRTG) world.getWorldChunkManager();

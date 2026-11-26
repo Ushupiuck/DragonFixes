@@ -2,6 +2,7 @@ package cc.unilock.dragonfixes.mixin.late.naturescompass;
 
 import Reika.ChromatiCraft.ChromatiCraft;
 import cc.unilock.dragonfixes.compat.StoredBiomeLookup;
+import cc.unilock.dragonfixes.compat.CompassBiomePrediction;
 import com.chaosthedude.naturescompass.util.BiomeSearchWorker;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -12,7 +13,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(value = BiomeSearchWorker.class, remap = false)
 public abstract class StoredBiomeSearchMixin {
@@ -81,14 +81,20 @@ public abstract class StoredBiomeSearchMixin {
         }
     }
 
-    // The generator-specific wraps have already resolved the prediction.
-    // Stored data wins here, independently of which generator produced it.
-    @ModifyVariable(method = "doWork", at = @At("STORE"), ordinal = 0, require = 1)
-    private BiomeGenBase dragonfixes$preferStored(BiomeGenBase predicted) {
-        if (!dragonfixes$enabled()) return predicted;
+    // Own the lookup in one place. Saved/live data must bypass both the raw
+    // biome query and generator-specific prediction, including RTG's forest filter.
+    @WrapOperation(method = "doWork",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBiomeGenForCoordsBody(II)Lnet/minecraft/world/biome/BiomeGenBase;", remap = false),
+            require = 1)
+    private BiomeGenBase dragonfixes$resolveSample(World sampleWorld, int sampleX, int sampleZ,
+            Operation<BiomeGenBase> original) {
+        if (!dragonfixes$enabled()) return original.call(sampleWorld, sampleX, sampleZ);
         if (dragonfixes$forcedBiome != null) return dragonfixes$forcedBiome;
-        if (world.getChunkProvider().chunkExists(x >> 4, z >> 4)) return predicted;
-        int stored = StoredBiomeLookup.read(world, x, z);
+        if (sampleWorld.getChunkProvider().chunkExists(sampleX >> 4, sampleZ >> 4)) {
+            return original.call(sampleWorld, sampleX, sampleZ);
+        }
+
+        int stored = StoredBiomeLookup.read(sampleWorld, sampleX, sampleZ);
         if (StoredBiomeLookup.isKnown(stored)) {
             BiomeGenBase actual = BiomeGenBase.getBiome(StoredBiomeLookup.id(stored));
             if (actual != null) {
@@ -96,8 +102,19 @@ public abstract class StoredBiomeSearchMixin {
                 return actual;
             }
         }
+
         dragonfixes$sampleTentative = true;
-        return predicted;
+        BiomeGenBase raw = original.call(sampleWorld, sampleX, sampleZ);
+        Object worker = this;
+        // Optional generator mixins implement separate interfaces. This avoids
+        // relying on the ordering of multiple WrapOperations on the same call.
+        if (worker instanceof CompassBiomePrediction.Rwg1) {
+            raw = ((CompassBiomePrediction.Rwg1) worker).dragonfixes$predictRwg1(sampleWorld, sampleX, sampleZ, raw);
+        }
+        if (worker instanceof CompassBiomePrediction.Rtg) {
+            raw = ((CompassBiomePrediction.Rtg) worker).dragonfixes$predictRtg(sampleWorld, sampleX, sampleZ, raw);
+        }
+        return raw;
     }
 
     @WrapOperation(method = "doWork",
