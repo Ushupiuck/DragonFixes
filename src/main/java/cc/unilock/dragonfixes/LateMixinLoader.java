@@ -50,6 +50,9 @@ public class LateMixinLoader implements ILateMixinLoader {
 
         if (loadedMods.contains("arsmagica2")) {
             mixins.add("am2.ShrinkHandlerMixin");
+            if (FMLLaunchHandler.side().isClient()) {
+                mixins.add("am2.client.PotionHudMixin");
+            }
         }
         if (cavecontrol) {
             mixins.add("cavecontrol.CaveLoaderMixin");

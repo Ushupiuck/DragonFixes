@@ -12,6 +12,7 @@ Most credit goes to [gamrguy](https://github.com/gamrguy) a.k.a. "RobotLucca" a.
 Fixes:
 - Disables the WAILA handlers for IFluidHandlers from Reika's mods, as WAILA provides its own handler for these (unilock)
 - Ars Magica 2 (optional, temporarily hosted here)
+  - Restores integer-aligned potion icon texture rows in the crosshair HUD, for both positive and negative effects, without changing layout, texture selection or flashing.
   - Reconstructs missing Liquid Etherium swimming in Legacy: native single-pass travel with Etherium drag/lift, swim jump and ledge escape, impact cushioning, extinguishing, per-entity entry sounds and bounded client bubble/splash effects. Keeps Etherium distinct from water and leaves older builds with their existing movement handler alone.
   - Guards missing AM2 extended player properties in `ShrinkHandler#onEntityLiving`, preventing simulated-player crashes during GuideNH/BlockRenderer6343 scans without disabling shrinking for initialized players.
 - CaveControl
