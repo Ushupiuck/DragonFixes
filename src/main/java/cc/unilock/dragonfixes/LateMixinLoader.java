@@ -70,6 +70,7 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.accessor.TileEntityCrystalBroadcasterAccessor");
             mixins.add("chromaticraft.accessor.RayTracerAccessor");
             mixins.add("chromaticraft.BiomeGlowingCliffsMixin");
+            mixins.add("chromaticraft.AcceleratorOptionalIntegrationMixin");
             mixins.add("chromaticraft.CliffTerrainQueryScopeMixin");
             mixins.add("chromaticraft.GlowingCliffsColumnShaperMixin");
             mixins.add("chromaticraft.BlockChromaTileMixin");
