@@ -119,6 +119,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CliffBiomeNeighborhood.java tests/CliffBiomeTileTest.java
           java -cp build/preview-tests CliffBiomeTileTest
 
+      - name: Check cliff height memoization and radial coordinate parity
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/CliffBiomeNeighborhood.java src/main/java/cc/unilock/dragonfixes/compat/CliffHeightMemo.java src/main/java/cc/unilock/dragonfixes/compat/CliffRadialAngles.java tests/CliffHeightMemoTest.java
+          java -cp build/preview-tests CliffHeightMemoTest
+
       - name: Check world-generation interception isolation
         run: |
           mkdir -p build/preview-tests
