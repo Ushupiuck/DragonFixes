@@ -84,6 +84,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.CliffTerrainQueryScopeMixin");
             mixins.add("chromaticraft.GlowingCliffsColumnShaperMixin");
             mixins.add("chromaticraft.EntityGlowCloudSafetyMixin");
+            mixins.add("chromaticraft.EntityDeathFogSafetyMixin");
+            mixins.add("chromaticraft.EntityVacuumSafetyMixin");
+            mixins.add("chromaticraft.EntityChainGunShotSafetyMixin");
             mixins.add("chromaticraft.BlockChromaTileMixin");
             mixins.add("chromaticraft.BlockDecoFlowerMixin");
             mixins.add("chromaticraft.BlockTieredPlantMixin");

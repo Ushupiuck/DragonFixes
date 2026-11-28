@@ -79,6 +79,12 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
         // The World class is loaded before late mixins. This hook is inert
         // unless the queried entity implements the optional cloud interface.
         mixins.add("world.GlowCloudEntityQueryMixin");
+        // Shared DragonAPI helpers can be loaded before ordinary mod init.
+        if (Launch.classLoader.getResource("Reika/DragonAPI/Libraries/ReikaEntityHelper.class") != null) {
+            mixins.add("dragonapi.ReikaEntityNumericalSafetyMixin");
+            mixins.add("dragonapi.ReikaPhysicsNumericalSafetyMixin");
+            mixins.add("dragonapi.RayTracerNumericalSafetyMixin");
+        }
         // AM2 is an ordinary mod, so it may not yet be discoverable here.
         // Install vanilla hooks now; enable them only at loadComplete.
         mixins.add("am2.EtheriumMovementMixin");

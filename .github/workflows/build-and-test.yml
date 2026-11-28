@@ -143,6 +143,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/GlowCloudPhysics.java tests/GlowCloudPhysicsTest.java
           java -cp build/preview-tests GlowCloudPhysicsTest
 
+      - name: Check shared Reika numerical safety and direction parity
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/ReikaNumericalSafety.java tests/ReikaNumericalSafetyTest.java
+          java -cp build/preview-tests ReikaNumericalSafetyTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 
