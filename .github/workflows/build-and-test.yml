@@ -137,6 +137,12 @@ jobs:
           javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/am2/EtheriumPhysics.java tests/EtheriumPhysicsTest.java
           java -cp build/preview-tests EtheriumPhysicsTest
 
+      - name: Check Glow Cloud velocity and collision-query safety
+        run: |
+          mkdir -p build/preview-tests
+          javac --release 8 -d build/preview-tests src/main/java/cc/unilock/dragonfixes/compat/GlowCloudPhysics.java tests/GlowCloudPhysicsTest.java
+          java -cp build/preview-tests GlowCloudPhysicsTest
+
       - name: Setup the workspace
         run: ./gradlew --build-cache --info --stacktrace setupCIWorkspace
 

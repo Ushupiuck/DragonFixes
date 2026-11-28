@@ -76,6 +76,9 @@ public class EarlyMixinLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
         }
         List<String> mixins = new ArrayList<>();
         mixins.add("world.WorldChunkManagerBiomeCacheAccessor");
+        // The World class is loaded before late mixins. This hook is inert
+        // unless the queried entity implements the optional cloud interface.
+        mixins.add("world.GlowCloudEntityQueryMixin");
         // AM2 is an ordinary mod, so it may not yet be discoverable here.
         // Install vanilla hooks now; enable them only at loadComplete.
         mixins.add("am2.EtheriumMovementMixin");
