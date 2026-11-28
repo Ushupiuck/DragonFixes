@@ -53,6 +53,9 @@ public class LateMixinLoader implements ILateMixinLoader {
         }
 
         if (loadedMods.contains("arsmagica2")) {
+            if (loadedMods.contains("Waila")) {
+                mixins.add("am2.WailaRegistrationMixin");
+            }
             mixins.add("am2.ShrinkHandlerMixin");
             if (loadedMods.contains("ForbiddenMagic") && loadedMods.contains("Thaumcraft")
                     && loadedMods.contains("dreamcraft")) {
