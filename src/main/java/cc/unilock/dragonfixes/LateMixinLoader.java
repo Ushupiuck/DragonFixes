@@ -57,6 +57,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("am2.WailaRegistrationMixin");
             }
             mixins.add("am2.ShrinkHandlerMixin");
+            mixins.add("am2.SpawnBlacklistImcMixin");
             if (loadedMods.contains("ForbiddenMagic") && loadedMods.contains("Thaumcraft")
                     && loadedMods.contains("dreamcraft")) {
                 mixins.add("am2.ForbiddenMagicGtnhResearchMixin");
@@ -74,6 +75,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.accessor.RayTracerAccessor");
             mixins.add("chromaticraft.BiomeGlowingCliffsMixin");
             mixins.add("chromaticraft.AcceleratorOptionalIntegrationMixin");
+            if (loadedMods.contains("Thaumcraft")) {
+                mixins.add("chromaticraft.TieredOreCapResearchMixin");
+            }
             if (loadedMods.contains("ProjRed|Integration") && loadedMods.contains("ForgeMultipart")) {
                 mixins.add("chromaticraft.ProjectRedAcceleratorMixin");
             }
