@@ -74,6 +74,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("chromaticraft.accessor.RayTracerAccessor");
             mixins.add("chromaticraft.BiomeGlowingCliffsMixin");
             mixins.add("chromaticraft.AcceleratorOptionalIntegrationMixin");
+            if (loadedMods.contains("ProjRed|Integration") && loadedMods.contains("ForgeMultipart")) {
+                mixins.add("chromaticraft.ProjectRedAcceleratorMixin");
+            }
             mixins.add("chromaticraft.CliffTerrainQueryScopeMixin");
             mixins.add("chromaticraft.GlowingCliffsColumnShaperMixin");
             mixins.add("chromaticraft.BlockChromaTileMixin");
