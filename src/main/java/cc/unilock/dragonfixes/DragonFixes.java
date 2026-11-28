@@ -46,6 +46,7 @@ public class DragonFixes {
         // All mods have finished init/postInit. It is now safe for AE2 to
         // enumerate other mods' creative-tab items on its CSV export thread.
         cc.unilock.dragonfixes.compat.am2.EtheriumCompat.initialize();
+        cc.unilock.dragonfixes.compat.BloodMagicAcceleratorCompat.register();
         AE2CSVExportBridge.startDeferred();
     }
 }
