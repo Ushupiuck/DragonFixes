@@ -2,10 +2,12 @@ package cc.unilock.dragonfixes.mixin.late.am2;
 
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 /** Retarget the orphaned AM2 Waila callback, preserving a native one if present. */
+@Pseudo
 @Mixin(targets = "am2.AMCore", remap = false)
 public abstract class WailaRegistrationMixin {
     @ModifyArg(method = "init", at = @At(value = "INVOKE",

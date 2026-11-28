@@ -2,6 +2,7 @@ package cc.unilock.dragonfixes.mixin.late.chromaticraft;
 
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Leave its Torcherino registrations intact; only defer the obsolete
  * ChromatiCraft branch until both mods have completed initialization.
  */
+@Pseudo
 @Mixin(targets = "WayofTime.alchemicalWizardry.AlchemicalWizardry", remap = false)
 public abstract class BloodMagicAcceleratorMixin {
     @Inject(method = "blacklistAccelerators", at = @At(value = "INVOKE",
